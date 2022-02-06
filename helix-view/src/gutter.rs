@@ -1,5 +1,7 @@
 use std::fmt::Write;
 
+use helix_vcs::LineDiff;
+
 use crate::{
     graphics::{Color, Style, UnderlineStyle},
     Document, Editor, Theme, View,
@@ -48,6 +50,34 @@ pub fn diagnostic<'doc>(
         }
         None
     })
+}
+
+pub fn diff<'doc>(
+    _editor: &'doc Editor,
+    doc: &'doc Document,
+    _view: &View,
+    theme: &Theme,
+    _is_focused: bool,
+    _width: usize,
+) -> GutterFn<'doc> {
+    let added = theme.get("diff.plus");
+    let deleted = theme.get("diff.minus");
+    let modified = theme.get("diff.delta");
+    if let Some(line_diffs) = doc.differ().map(|differ| differ.get_line_diffs()) {
+        Box::new(move |line: usize, _selected: bool, out: &mut String| {
+            let diff = *line_diffs.get(&line)?;
+
+            let (icon, style) = match diff {
+                LineDiff::Added => ("▍", added),
+                LineDiff::Deleted => ("▔", deleted),
+                LineDiff::Modified => ("▍", modified),
+            };
+            write!(out, "{}", icon).unwrap();
+            Some(style)
+        })
+    } else {
+        Box::new(move |_, _, _| None)
+    }
 }
 
 pub fn line_numbers<'doc>(
