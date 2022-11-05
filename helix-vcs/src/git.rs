@@ -19,6 +19,7 @@ impl Git {
 
         // don't use the global git configs (not needed)
         let config = git::permissions::Config {
+            git_binary: false,
             system: false,
             git: false,
             user: false,
@@ -70,12 +71,12 @@ fn find_file_in_commit(repo: &Repository, commit: &Commit, file: &Path) -> Optio
     let rel_path = file.strip_prefix(repo_dir).ok()?;
     let rel_path_components = byte_path_components(rel_path)?;
     let tree = commit.tree().ok()?;
-    let tree_entry = tree.lookup_path(rel_path_components).ok()??;
-    match tree_entry.mode {
+    let tree_entry = tree.lookup_entry(rel_path_components).ok()??;
+    match tree_entry.mode() {
         // not a file, everything is new, do not show diff
         EntryMode::Tree | EntryMode::Commit | EntryMode::Link => None,
         // found a file
-        EntryMode::Blob | EntryMode::BlobExecutable => Some(tree_entry.oid),
+        EntryMode::Blob | EntryMode::BlobExecutable => Some(tree_entry.object_id()),
     }
 }
 
