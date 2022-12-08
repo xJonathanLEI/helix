@@ -183,6 +183,15 @@ impl Application {
         let editor_view = Box::new(ui::EditorView::new(Keymaps::new(keys)));
         compositor.push(editor_view);
 
+        let language = match &args.language {
+            Some(lang) => Some(
+                syn_loader
+                    .language_config_for_language_id(lang)
+                    .ok_or_else(|| anyhow::anyhow!("invalid language id: {}", lang))?,
+            ),
+            None => None,
+        };
+
         if args.load_tutor {
             let path = helix_loader::runtime_dir().join("tutor");
             editor.open(&path, Action::VerticalSplit)?;
@@ -192,7 +201,7 @@ impl Application {
             let first = &args.files[0].0; // we know it's not empty
             if first.is_dir() {
                 std::env::set_current_dir(first).context("set current dir")?;
-                editor.new_file(Action::VerticalSplit);
+                editor.new_file_with_language(Action::VerticalSplit, language);
                 let picker = ui::file_picker(".".into(), &config.load().editor);
                 compositor.push(Box::new(overlayed(picker)));
             } else {
@@ -215,7 +224,7 @@ impl Application {
                             None => Action::Load,
                         };
                         let doc_id = editor
-                            .open(&file, action)
+                            .open_with_language(&file, action, language.clone())
                             .context(format!("open '{}'", file.to_string_lossy()))?;
                         // with Action::Load all documents have the same view
                         // NOTE: this isn't necessarily true anymore. If
@@ -238,7 +247,7 @@ impl Application {
                 align_view(doc, view, Align::Center);
             }
         } else if stdin().is_tty() || cfg!(feature = "integration") {
-            editor.new_file(Action::VerticalSplit);
+            editor.new_file_with_language(Action::VerticalSplit, language);
         } else if cfg!(target_os = "macos") {
             // On Linux and Windows, we allow the output of a command to be piped into the new buffer.
             // This doesn't currently work on macOS because of the following issue:
@@ -246,8 +255,8 @@ impl Application {
             anyhow::bail!("Piping into helix-term is currently not supported on macOS");
         } else {
             editor
-                .new_file_from_stdin(Action::VerticalSplit)
-                .unwrap_or_else(|_| editor.new_file(Action::VerticalSplit));
+                .new_file_from_stdin(Action::VerticalSplit, language.clone())
+                .unwrap_or_else(|_| editor.new_file_with_language(Action::VerticalSplit, language));
         }
 
         editor.set_theme(theme);

@@ -67,6 +67,7 @@ FLAGS:
                                    or 'all'. 'all' is the default if not specified.
     -g, --grammar {{fetch|build}}    Fetches or builds tree-sitter grammars listed in languages.toml
     -c, --config <file>            Specifies a file to use for configuration
+    --lang <language>              Forces the language id on the first buffer opened
     -v                             Increases logging verbosity each use for up to 3 times
     --log                          Specifies a file to use for logging
                                    (default file: {})

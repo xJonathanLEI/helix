@@ -16,6 +16,7 @@ pub struct Args {
     pub verbosity: u64,
     pub log_file: Option<PathBuf>,
     pub config_file: Option<PathBuf>,
+    pub language: Option<String>,
     pub files: Vec<(PathBuf, Position)>,
 }
 
@@ -54,6 +55,10 @@ impl Args {
                 "-c" | "--config" => match argv.next().as_deref() {
                     Some(path) => args.config_file = Some(path.into()),
                     None => anyhow::bail!("--config must specify a path to read"),
+                },
+                "--lang" => match argv.next().as_deref() {
+                    Some(language) => args.language = Some(language.to_owned()),
+                    None => anyhow::bail!("--lang must specify a language to use"),
                 },
                 "--log" => match argv.next().as_deref() {
                     Some(path) => args.log_file = Some(path.into()),
