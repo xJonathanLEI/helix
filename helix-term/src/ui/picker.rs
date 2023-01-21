@@ -371,6 +371,11 @@ impl Ord for PickerMatch {
     }
 }
 
+enum MatchMode {
+    Fuzzy,
+    Exact,
+}
+
 pub struct Picker<T: Item> {
     options: Vec<T>,
     editor_data: T::Data,
@@ -393,6 +398,8 @@ pub struct Picker<T: Item> {
     widths: Vec<Constraint>,
 
     callback_fn: Box<dyn Fn(&mut Context, &T, Action)>,
+
+    match_mode: MatchMode,
 }
 
 impl<T: Item> Picker<T> {
@@ -441,6 +448,7 @@ impl<T: Item> Picker<T> {
             callback_fn: Box::new(callback_fn),
             completion_height: 0,
             widths,
+            match_mode: MatchMode::Fuzzy,
         };
 
         // scoring on empty input:
@@ -510,24 +518,48 @@ impl<T: Item> Picker<T> {
     pub fn force_score(&mut self) {
         let pattern = self.prompt.line();
 
-        let query = FuzzyQuery::new(pattern);
         self.matches.clear();
-        self.matches.extend(
-            self.options
-                .iter()
-                .enumerate()
-                .filter_map(|(index, option)| {
-                    let text = option.filter_text(&self.editor_data);
-
-                    query
-                        .fuzzy_match(&text, &self.matcher)
-                        .map(|score| PickerMatch {
-                            index,
-                            score,
-                            len: text.chars().count(),
-                        })
-                }),
-        );
+        match self.match_mode {
+            MatchMode::Fuzzy => {
+                let query = FuzzyQuery::new(pattern);
+                self.matches
+                    .extend(
+                        self.options
+                            .iter()
+                            .enumerate()
+                            .filter_map(|(index, option)| {
+                                let text = option.filter_text(&self.editor_data);
+                                query
+                                    .fuzzy_match(&text, &self.matcher)
+                                    .map(|score| PickerMatch {
+                                        index,
+                                        score,
+                                        len: text.chars().count(),
+                                    })
+                            }),
+                    );
+            }
+            MatchMode::Exact => {
+                self.matches
+                    .extend(
+                        self.options
+                            .iter()
+                            .enumerate()
+                            .filter_map(|(index, option)| {
+                                let text = option.filter_text(&self.editor_data);
+                                if text.contains(pattern) {
+                                    Some(PickerMatch {
+                                        index,
+                                        score: 0,
+                                        len: text.chars().count(),
+                                    })
+                                } else {
+                                    None
+                                }
+                            }),
+                    );
+            }
+        }
 
         self.matches.sort_unstable();
     }
@@ -579,6 +611,13 @@ impl<T: Item> Picker<T> {
 
     pub fn toggle_preview(&mut self) {
         self.show_preview = !self.show_preview;
+    }
+
+    pub fn toggle_match_mode(&mut self) {
+        self.match_mode = match self.match_mode {
+            MatchMode::Fuzzy => MatchMode::Exact,
+            MatchMode::Exact => MatchMode::Fuzzy,
+        };
     }
 
     fn prompt_handle_event(&mut self, event: &Event, cx: &mut Context) -> EventResult {
@@ -665,6 +704,10 @@ impl<T: Item + 'static> Component for Picker<T> {
             ctrl!('t') => {
                 self.toggle_preview();
             }
+            ctrl!('e') => {
+                self.toggle_match_mode();
+                self.force_score();
+            }
             _ => {
                 self.prompt_handle_event(event, cx);
             }
@@ -695,7 +738,15 @@ impl<T: Item + 'static> Component for Picker<T> {
 
         let area = inner.clip_left(1).with_height(1);
 
-        let count = format!("{}/{}", self.matches.len(), self.options.len());
+        let count = format!(
+            "{}{}/{}",
+            match self.match_mode {
+                MatchMode::Fuzzy => "",
+                MatchMode::Exact => "[E] ",
+            },
+            self.matches.len(),
+            self.options.len()
+        );
         surface.set_stringn(
             (area.x + area.width).saturating_sub(count.len() as u16 + 1),
             area.y,
