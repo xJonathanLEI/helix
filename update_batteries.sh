@@ -15,8 +15,8 @@ INTERESTING_PRS=(
   5244
   # Support going to specific positions in file
   5260
-  # rework positioning/rendering and enable softwrap/virtual text
-  5420
+  # Make mouse click extend selection in select mode
+  5436
   # Only render the auto-complete menu if it intersects with signature help
   5523
   # Changed file picker
