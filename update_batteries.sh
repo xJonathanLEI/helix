@@ -7,8 +7,6 @@ set -x
 
 # The list of PRs to pick here:
 INTERESTING_PRS=(
-  # Add optional substring matching for picker
-  5114
   # Fix old values shown in `select_register`
   5242
   # Make search commands respect register selection
