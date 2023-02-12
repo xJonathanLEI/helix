@@ -234,8 +234,9 @@ via the <code>HELIX_RUNTIME</code> environment variable.</p>
 <p>Starting with Windows Vista you can also create symbolic links on Windows. Note that this requires
 elevated privileges - i.e. PowerShell or Cmd must be run as administrator.</p>
 <p><strong>PowerShell:</strong></p>
-<pre><code class="language-powershell">New-Item -ItemType SymbolicLink -Target &quot;runtime&quot; -Path &quot;$Env:AppData\helix\runtime&quot;
+<pre><code class="language-powershell">New-Item -ItemType Junction -Target &quot;runtime&quot; -Path &quot;$Env:AppData\helix\runtime&quot;
 </code></pre>
+<p>Note: &quot;runtime&quot; must be the absolute path to the runtime directory.</p>
 <p><strong>Cmd:</strong></p>
 <pre><code class="language-cmd">cd %appdata%\helix
 mklink /D runtime &quot;&lt;helix-repo&gt;\runtime&quot;
@@ -861,6 +862,7 @@ you to selectively add search terms to your selections.</p>
 <tr><td><code>:change-current-directory</code>, <code>:cd</code></td><td>Change the current working directory.</td></tr>
 <tr><td><code>:show-directory</code>, <code>:pwd</code></td><td>Show the current working directory.</td></tr>
 <tr><td><code>:encoding</code></td><td>Set encoding. Based on <code>https://encoding.spec.whatwg.org</code>.</td></tr>
+<tr><td><code>:character-info</code>, <code>:char</code></td><td>Get info about the character under the primary cursor.</td></tr>
 <tr><td><code>:reload</code></td><td>Discard changes and reload from the source file.</td></tr>
 <tr><td><code>:reload-all</code></td><td>Discard changes and reload all documents from the source files.</td></tr>
 <tr><td><code>:update</code></td><td>Write changes only if the file has been modified.</td></tr>
@@ -956,6 +958,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>haskell</td><td>✓</td><td>✓</td><td></td><td><code>haskell-language-server-wrapper</code></td></tr>
 <tr><td>hcl</td><td>✓</td><td></td><td>✓</td><td><code>terraform-ls</code></td></tr>
 <tr><td>heex</td><td>✓</td><td>✓</td><td></td><td><code>elixir-ls</code></td></tr>
+<tr><td>hosts</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>html</td><td>✓</td><td></td><td></td><td><code>vscode-html-language-server</code></td></tr>
 <tr><td>idris</td><td></td><td></td><td></td><td><code>idris2-lsp</code></td></tr>
 <tr><td>iex</td><td>✓</td><td></td><td></td><td></td></tr>
@@ -983,6 +986,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>mermaid</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>meson</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>mint</td><td></td><td></td><td></td><td><code>mint</code></td></tr>
+<tr><td>msbuild</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>nickel</td><td>✓</td><td></td><td>✓</td><td><code>nls</code></td></tr>
 <tr><td>nix</td><td>✓</td><td></td><td></td><td><code>nil</code></td></tr>
 <tr><td>nu</td><td>✓</td><td></td><td></td><td></td></tr>
@@ -992,6 +996,8 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>openscad</td><td>✓</td><td></td><td></td><td><code>openscad-lsp</code></td></tr>
 <tr><td>org</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>pascal</td><td>✓</td><td>✓</td><td></td><td><code>pasls</code></td></tr>
+<tr><td>passwd</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>pem</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>perl</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
 <tr><td>php</td><td>✓</td><td>✓</td><td>✓</td><td><code>intelephense</code></td></tr>
 <tr><td>ponylang</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
@@ -1657,6 +1663,7 @@ berry = &quot;#2A2A4D&quot;
 <tr><td><code>ui.virtual.ruler</code></td><td>Ruler columns (see the <a href="./configuration.html#editor-section"><code>editor.rulers</code> config</a>)</td></tr>
 <tr><td><code>ui.virtual.whitespace</code></td><td>Visible whitespace characters</td></tr>
 <tr><td><code>ui.virtual.indent-guide</code></td><td>Vertical indent width guides</td></tr>
+<tr><td><code>ui.virtual.wrap</code></td><td>Soft-wrap indicator (see the <a href="./configuration.html#editor-section"><code>editor.soft-wrap</code> config</a>)</td></tr>
 <tr><td><code>ui.menu</code></td><td>Code and command completion menus</td></tr>
 <tr><td><code>ui.menu.selected</code></td><td>Selected autocomplete item</td></tr>
 <tr><td><code>ui.menu.scroll</code></td><td><code>fg</code> sets thumb color, <code>bg</code> sets track color of scrollbar</td></tr>
