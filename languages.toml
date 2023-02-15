@@ -7,6 +7,7 @@ awk-language-server = { command = "awk-language-server" }
 bash-language-server = { command = "bash-language-server", args = ["start"] }
 bass = { command = "bass", args = ["--lsp"] }
 bicep-langserver = { command = "bicep-langserver" }
+cairo-language-server = { command = "cairo-language-server" }
 cl-lsp = { command = "cl-lsp", args = [ "stdio" ] }
 clangd = { command = "clangd" }
 clojure-lsp = { command = "clojure-lsp" }
@@ -1698,12 +1699,11 @@ scope = "source.cairo"
 injection-regex = "cairo"
 file-types = ["cairo"]
 roots = []
+language-servers = [ "cairo-language-server" ]
 comment-token = "//"
 indent = { tab-width = 4, unit = "    " }
-
-[[grammar]]
-name = "cairo"
-source = { git = "https://github.com/archseer/tree-sitter-cairo", rev = "b249662a1eefeb4d71c9529cdd971e74fecc10fe" }
+formatter = { command = "cairo-format" , args = ["-"] }
+grammar = "rust"
 
 [[language]]
 name = "cpon"
