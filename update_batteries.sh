@@ -19,8 +19,6 @@ INTERESTING_PRS=(
   5523
   # Changed file picker
   5645
-  # Ignore invalid file URIs from LSP
-  6000
 )
 
 # Makes the latest PR head available at a local branch
