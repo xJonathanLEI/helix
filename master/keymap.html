@@ -409,13 +409,15 @@ it).</p>
 <tr><td><code>F</code></td><td>Open file picker at current working directory</td><td><code>file_picker_in_current_directory</code></td></tr>
 <tr><td><code>b</code></td><td>Open buffer picker</td><td><code>buffer_picker</code></td></tr>
 <tr><td><code>j</code></td><td>Open jumplist picker</td><td><code>jumplist_picker</code></td></tr>
+<tr><td><code>g</code></td><td>Debug (experimental)</td><td>N/A</td></tr>
 <tr><td><code>k</code></td><td>Show documentation for item under cursor in a <a href="#popup">popup</a> (<strong>LSP</strong>)</td><td><code>hover</code></td></tr>
 <tr><td><code>s</code></td><td>Open document symbol picker (<strong>LSP</strong>)</td><td><code>symbol_picker</code></td></tr>
 <tr><td><code>S</code></td><td>Open workspace symbol picker (<strong>LSP</strong>)</td><td><code>workspace_symbol_picker</code></td></tr>
 <tr><td><code>d</code></td><td>Open document diagnostics picker (<strong>LSP</strong>)</td><td><code>diagnostics_picker</code></td></tr>
 <tr><td><code>D</code></td><td>Open workspace diagnostics picker (<strong>LSP</strong>)</td><td><code>workspace_diagnostics_picker</code></td></tr>
 <tr><td><code>r</code></td><td>Rename symbol (<strong>LSP</strong>)</td><td><code>rename_symbol</code></td></tr>
-<tr><td><code>a</code></td><td>Apply code action  (<strong>LSP</strong>)</td><td><code>code_action</code></td></tr>
+<tr><td><code>a</code></td><td>Apply code action (<strong>LSP</strong>)</td><td><code>code_action</code></td></tr>
+<tr><td><code>h</code></td><td>Select symbol references (<strong>LSP</strong>)</td><td><code>select_references_to_symbol_under_cursor</code></td></tr>
 <tr><td><code>'</code></td><td>Open last fuzzy picker</td><td><code>last_picker</code></td></tr>
 <tr><td><code>w</code></td><td>Enter <a href="#window-mode">window mode</a></td><td>N/A</td></tr>
 <tr><td><code>p</code></td><td>Paste system clipboard after selections</td><td><code>paste_clipboard_after</code></td></tr>
@@ -480,7 +482,7 @@ experience.</p>
 <tr><td><code>Alt-d</code>, <code>Alt-Delete</code></td><td>Delete next word</td><td><code>delete_word_forward</code></td></tr>
 <tr><td><code>Ctrl-u</code></td><td>Delete to start of line</td><td><code>kill_to_line_start</code></td></tr>
 <tr><td><code>Ctrl-k</code></td><td>Delete to end of line</td><td><code>kill_to_line_end</code></td></tr>
-<tr><td><code>Ctrl-h</code>, <code>Backspace</code></td><td>Delete previous char</td><td><code>delete_char_backward</code></td></tr>
+<tr><td><code>Ctrl-h</code>, <code>Backspace</code>, <code>Shift-Backspace</code></td><td>Delete previous char</td><td><code>delete_char_backward</code></td></tr>
 <tr><td><code>Ctrl-d</code>, <code>Delete</code></td><td>Delete next char</td><td><code>delete_char_forward</code></td></tr>
 <tr><td><code>Ctrl-j</code>, <code>Enter</code></td><td>Insert new line</td><td><code>insert_newline</code></td></tr>
 </tbody></table>
@@ -550,7 +552,7 @@ you to selectively add search terms to your selections.</p>
 <tr><td><code>Alt-d</code>, <code>Alt-Delete</code>, <code>Ctrl-Delete</code></td><td>Delete next word</td></tr>
 <tr><td><code>Ctrl-u</code></td><td>Delete to start of line</td></tr>
 <tr><td><code>Ctrl-k</code></td><td>Delete to end of line</td></tr>
-<tr><td><code>Backspace</code>, <code>Ctrl-h</code></td><td>Delete previous char</td></tr>
+<tr><td><code>Backspace</code>, <code>Ctrl-h</code>, <code>Shift-Backspace</code></td><td>Delete previous char</td></tr>
 <tr><td><code>Delete</code>, <code>Ctrl-d</code></td><td>Delete next char</td></tr>
 <tr><td><code>Ctrl-s</code></td><td>Insert a word under doc cursor, may be changed to Ctrl-r Ctrl-w later</td></tr>
 <tr><td><code>Ctrl-p</code>, <code>Up</code></td><td>Select previous history</td></tr>
