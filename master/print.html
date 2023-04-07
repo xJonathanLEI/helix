@@ -996,6 +996,7 @@ you to selectively add search terms to your selections.</p>
 <tr><td><code>:tree-sitter-subtree</code>, <code>:ts-subtree</code></td><td>Display tree sitter subtree under cursor, primarily for debugging queries.</td></tr>
 <tr><td><code>:config-reload</code></td><td>Refresh user config.</td></tr>
 <tr><td><code>:config-open</code></td><td>Open the user config.toml file.</td></tr>
+<tr><td><code>:config-open-workspace</code></td><td>Open the workspace config.toml file.</td></tr>
 <tr><td><code>:log-open</code></td><td>Open the helix log file.</td></tr>
 <tr><td><code>:insert-output</code></td><td>Run shell command, inserting output before each selection.</td></tr>
 <tr><td><code>:append-output</code></td><td>Run shell command, appending output after each selection.</td></tr>
@@ -1071,6 +1072,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>heex</td><td>✓</td><td>✓</td><td></td><td><code>elixir-ls</code></td></tr>
 <tr><td>hosts</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>html</td><td>✓</td><td></td><td></td><td><code>vscode-html-language-server</code></td></tr>
+<tr><td>hurl</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>idris</td><td></td><td></td><td></td><td><code>idris2-lsp</code></td></tr>
 <tr><td>iex</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>ini</td><td>✓</td><td></td><td></td><td></td></tr>
@@ -1080,7 +1082,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>json</td><td>✓</td><td></td><td>✓</td><td><code>vscode-json-language-server</code></td></tr>
 <tr><td>jsonnet</td><td>✓</td><td></td><td></td><td><code>jsonnet-language-server</code></td></tr>
 <tr><td>jsx</td><td>✓</td><td>✓</td><td>✓</td><td><code>typescript-language-server</code></td></tr>
-<tr><td>julia</td><td>✓</td><td></td><td></td><td><code>julia</code></td></tr>
+<tr><td>julia</td><td>✓</td><td>✓</td><td>✓</td><td><code>julia</code></td></tr>
 <tr><td>kdl</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>kotlin</td><td>✓</td><td></td><td></td><td><code>kotlin-language-server</code></td></tr>
 <tr><td>latex</td><td>✓</td><td>✓</td><td></td><td><code>texlab</code></td></tr>
@@ -1128,6 +1130,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>rego</td><td>✓</td><td></td><td></td><td><code>regols</code></td></tr>
 <tr><td>rescript</td><td>✓</td><td>✓</td><td></td><td><code>rescript-language-server</code></td></tr>
 <tr><td>rmarkdown</td><td>✓</td><td></td><td>✓</td><td><code>R</code></td></tr>
+<tr><td>robot</td><td>✓</td><td></td><td></td><td><code>robotframework_ls</code></td></tr>
 <tr><td>ron</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>rst</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>ruby</td><td>✓</td><td>✓</td><td>✓</td><td><code>solargraph</code></td></tr>
@@ -1211,6 +1214,8 @@ hidden = false
 <code>--config</code> command line argument, for example <code>hx -c path/to/custom-config.toml</code>.
 Additionally, you can reload the configuration file by sending the USR1
 signal to the Helix process on Unix operating systems, such as by using the command <code>pkill -USR1 hx</code>.</p>
+<p>Finally, you can have a <code>config.toml</code> local to a project by putting it under a <code>.helix</code> directory in your repository.
+Its settings will be merged with the configuration directory <code>config.toml</code> and the built-in configuration.</p>
 <h2 id="editor"><a class="header" href="#editor">Editor</a></h2>
 <h3 id="editor-section"><a class="header" href="#editor-section"><code>[editor]</code> Section</a></h3>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th><th>Default</th></tr></thead><tbody>
@@ -1236,6 +1241,7 @@ signal to the Helix process on Unix operating systems, such as by using the comm
 <tr><td><code>bufferline</code></td><td>Renders a line at the top of the editor displaying open buffers. Can be <code>always</code>, <code>never</code> or <code>multiple</code> (only shown if more than one buffer is in use)</td><td><code>never</code></td></tr>
 <tr><td><code>color-modes</code></td><td>Whether to color the mode indicator with different colors depending on the mode itself</td><td><code>false</code></td></tr>
 <tr><td><code>text-width</code></td><td>Maximum line length. Used for the <code>:reflow</code> command and soft-wrapping if <code>soft-wrap.wrap_at_text_width</code> is set</td><td><code>80</code></td></tr>
+<tr><td><code>workspace-lsp-roots</code></td><td>Directories relative to the workspace root that are treated as LSP roots. Should only be set in <code>.helix/config.toml</code></td><td><code>[]</code></td></tr>
 </tbody></table>
 </div>
 <h3 id="editorstatusline-section"><a class="header" href="#editorstatusline-section"><code>[editor.statusline]</code> Section</a></h3>
@@ -1292,6 +1298,7 @@ mode.select = &quot;SELECT&quot;
 <tr><td><code>auto-signature-help</code></td><td>Enable automatic popup of signature help (parameter hints)</td><td><code>true</code></td></tr>
 <tr><td><code>display-inlay-hints</code></td><td>Display inlay hints<sup class="footnote-reference"><a href="#2">2</a></sup></td><td><code>false</code></td></tr>
 <tr><td><code>display-signature-help-docs</code></td><td>Display docs under signature help popup</td><td><code>true</code></td></tr>
+<tr><td><code>snippets</code></td><td>Enables snippet completions. Requires a server restart (<code>:lsp-restart</code>) to take effect after <code>:config-reload</code>/<code>:set</code>.</td><td><code>true</code></td></tr>
 </tbody></table>
 </div>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
@@ -1790,8 +1797,11 @@ berry = &quot;#2A2A4D&quot;
 <tr><td><code>ui.cursor.primary.normal</code></td><td></td></tr>
 <tr><td><code>ui.cursor.primary.insert</code></td><td></td></tr>
 <tr><td><code>ui.cursor.primary.select</code></td><td></td></tr>
+<tr><td><code>ui.debug.breakpoint</code></td><td>Breakpoint indicator, found in the gutter</td></tr>
+<tr><td><code>ui.debug.active</code></td><td>Indicator for the line at which debugging execution is paused at, found in the gutter</td></tr>
 <tr><td><code>ui.gutter</code></td><td>Gutter</td></tr>
 <tr><td><code>ui.gutter.selected</code></td><td>Gutter for the line the cursor is on</td></tr>
+<tr><td><code>ui.highlight.frameline</code></td><td>Line at which debugging execution is paused at</td></tr>
 <tr><td><code>ui.linenr</code></td><td>Line numbers</td></tr>
 <tr><td><code>ui.linenr.selected</code></td><td>Line number for the line the cursor is on</td></tr>
 <tr><td><code>ui.statusline</code></td><td>Statusline</td></tr>
@@ -1961,6 +1971,7 @@ formatter = { command = &quot;mylang-formatter&quot; , args = [&quot;--stdin&quo
 <tr><td><code>grammar</code></td><td>The tree-sitter grammar to use (defaults to the value of <code>name</code>)</td></tr>
 <tr><td><code>formatter</code></td><td>The formatter for the language, it will take precedence over the lsp when defined. The formatter must be able to take the original file as input from stdin and write the formatted file to stdout</td></tr>
 <tr><td><code>text-width</code></td><td>Maximum line length. Used for the <code>:reflow</code> command and soft-wrapping if <code>soft-wrap.wrap_at_text_width</code> is set, defaults to <code>editor.text-width</code></td></tr>
+<tr><td><code>workspace-lsp-roots</code></td><td>Directories relative to the workspace root that are treated as LSP roots. Should only be set in <code>.helix/config.toml</code>. Overwrites the setting of the same name in <code>config.toml</code> if set.</td></tr>
 </tbody></table>
 </div>
 <h3 id="file-type-detection-and-the-file-types-key"><a class="header" href="#file-type-detection-and-the-file-types-key">File-type detection and the <code>file-types</code> key</a></h3>
