@@ -167,6 +167,7 @@ For everything else (e.g., how to install supported language servers), see the <
 <li><a href="install.html#fedorarhel">Fedora/RHEL</a></li>
 <li><a href="install.html#arch-linux-community">Arch Linux community</a></li>
 <li><a href="install.html#nixos">NixOS</a></li>
+<li><a href="install.html#flatpak">Flatpak</a></li>
 <li><a href="install.html#appimage">AppImage</a></li>
 </ul>
 </li>
@@ -185,7 +186,13 @@ For everything else (e.g., how to install supported language servers), see the <
 </li>
 <li><a href="install.html#building-from-source">Building from source</a>
 <ul>
-<li><a href="install.html#configuring-helixs-runtime-files">Configuring Helix's runtime files</a></li>
+<li><a href="install.html#configuring-helixs-runtime-files">Configuring Helix's runtime files</a>
+<ul>
+<li><a href="install.html#linux-and-macos">Linux and macOS</a></li>
+<li><a href="install.html#windows">Windows</a></li>
+<li><a href="install.html#multiple-runtime-directories">Multiple runtime directories</a></li>
+</ul>
+</li>
 <li><a href="install.html#validating-the-installation">Validating the installation</a></li>
 <li><a href="install.html#configure-the-desktop-shortcut">Configure the desktop shortcut</a></li>
 </ul>
@@ -240,6 +247,11 @@ accepts the new settings on first use.</p>
 <p>If you are using a version of Nix without flakes enabled,
 <a href="https://docs.cachix.org/installation">install Cachix CLI</a> and use
 <code>cachix use helix</code> to configure Nix to use cached outputs when possible.</p>
+<h3 id="flatpak"><a class="header" href="#flatpak">Flatpak</a></h3>
+<p>Helix is available on <a href="https://flathub.org/en-GB/apps/com.helix_editor.Helix">Flathub</a>:</p>
+<pre><code class="language-sh">flatpak install flathub com.helix_editor.Helix
+flatpak run com.helix_editor.Helix
+</code></pre>
 <h3 id="appimage"><a class="header" href="#appimage">AppImage</a></h3>
 <p>Install Helix using the Linux <a href="https://appimage.org/">AppImage</a> format.
 Download the official Helix AppImage from the <a href="https://github.com/helix-editor/helix/releases/latest">latest releases</a> page.</p>
@@ -547,7 +559,7 @@ selection to the &quot;func&quot; <code>identifier</code>.</p>
 </ul>
 </li>
 <li><a href="keymap.html#insert-mode">Insert mode</a></li>
-<li><a href="keymap.html#select-extend-mode">Select / extend mode</a></li>
+<li><a href="keymap.html#select--extend-mode">Select / extend mode</a></li>
 <li><a href="keymap.html#picker">Picker</a></li>
 <li><a href="keymap.html#prompt">Prompt</a></li>
 </ul>
@@ -564,8 +576,8 @@ selection to the &quot;func&quot; <code>identifier</code>.</p>
 </blockquote>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th><th>Command</th></tr></thead><tbody>
 <tr><td><code>h</code>, <code>Left</code></td><td>Move left</td><td><code>move_char_left</code></td></tr>
-<tr><td><code>j</code>, <code>Down</code></td><td>Move down</td><td><code>move_line_down</code></td></tr>
-<tr><td><code>k</code>, <code>Up</code></td><td>Move up</td><td><code>move_line_up</code></td></tr>
+<tr><td><code>j</code>, <code>Down</code></td><td>Move down</td><td><code>move_visual_line_down</code></td></tr>
+<tr><td><code>k</code>, <code>Up</code></td><td>Move up</td><td><code>move_visual_line_up</code></td></tr>
 <tr><td><code>l</code>, <code>Right</code></td><td>Move right</td><td><code>move_char_right</code></td></tr>
 <tr><td><code>w</code></td><td>Move next word start</td><td><code>move_next_word_start</code></td></tr>
 <tr><td><code>b</code></td><td>Move previous word start</td><td><code>move_prev_word_start</code></td></tr>
@@ -734,6 +746,8 @@ useful when you're simply looking over text and not actively editing it.</p>
 <tr><td><code>n</code></td><td>Go to next buffer</td><td><code>goto_next_buffer</code></td></tr>
 <tr><td><code>p</code></td><td>Go to previous buffer</td><td><code>goto_previous_buffer</code></td></tr>
 <tr><td><code>.</code></td><td>Go to last modification in current file</td><td><code>goto_last_modification</code></td></tr>
+<tr><td><code>j</code></td><td>Move down textual (instead of visual) line</td><td><code>move_line_down</code></td></tr>
+<tr><td><code>k</code></td><td>Move up textual (instead of visual) line</td><td><code>move_line_up</code></td></tr>
 </tbody></table>
 </div>
 <h4 id="match-mode"><a class="header" href="#match-mode">Match mode</a></h4>
@@ -949,7 +963,9 @@ you to selectively add search terms to your selections.</p>
 <tr><td><code>:buffer-next</code>, <code>:bn</code>, <code>:bnext</code></td><td>Goto next buffer.</td></tr>
 <tr><td><code>:buffer-previous</code>, <code>:bp</code>, <code>:bprev</code></td><td>Goto previous buffer.</td></tr>
 <tr><td><code>:write</code>, <code>:w</code></td><td>Write changes to disk. Accepts an optional path (:write some/path.txt)</td></tr>
-<tr><td><code>:write!</code>, <code>:w!</code></td><td>Force write changes to disk creating necessary subdirectories. Accepts an optional path (:write some/path.txt)</td></tr>
+<tr><td><code>:write!</code>, <code>:w!</code></td><td>Force write changes to disk creating necessary subdirectories. Accepts an optional path (:write! some/path.txt)</td></tr>
+<tr><td><code>:write-buffer-close</code>, <code>:wbc</code></td><td>Write changes to disk and closes the buffer. Accepts an optional path (:write-buffer-close some/path.txt)</td></tr>
+<tr><td><code>:write-buffer-close!</code>, <code>:wbc!</code></td><td>Force write changes to disk creating necessary subdirectories and closes the buffer. Accepts an optional path (:write-buffer-close! some/path.txt)</td></tr>
 <tr><td><code>:new</code>, <code>:n</code></td><td>Create a new scratch buffer.</td></tr>
 <tr><td><code>:format</code>, <code>:fmt</code></td><td>Format the file using the LSP formatter.</td></tr>
 <tr><td><code>:indent-style</code></td><td>Set the indentation style for editing. ('t' for tabs or 1-8 for number of spaces.)</td></tr>
@@ -1034,7 +1050,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>bicep</td><td>✓</td><td></td><td></td><td><code>bicep-langserver</code></td></tr>
 <tr><td>c</td><td>✓</td><td>✓</td><td>✓</td><td><code>clangd</code></td></tr>
 <tr><td>c-sharp</td><td>✓</td><td>✓</td><td></td><td><code>OmniSharp</code></td></tr>
-<tr><td>cabal</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>cabal</td><td></td><td></td><td></td><td></td></tr>
 <tr><td>cairo</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>capnp</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>clojure</td><td>✓</td><td></td><td></td><td><code>clojure-lsp</code></td></tr>
@@ -1043,7 +1059,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>common-lisp</td><td>✓</td><td></td><td></td><td><code>cl-lsp</code></td></tr>
 <tr><td>cpon</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>cpp</td><td>✓</td><td>✓</td><td>✓</td><td><code>clangd</code></td></tr>
-<tr><td>crystal</td><td>✓</td><td>✓</td><td></td><td></td></tr>
+<tr><td>crystal</td><td>✓</td><td>✓</td><td></td><td><code>crystalline</code></td></tr>
 <tr><td>css</td><td>✓</td><td></td><td></td><td><code>vscode-css-language-server</code></td></tr>
 <tr><td>cue</td><td>✓</td><td></td><td></td><td><code>cuelsp</code></td></tr>
 <tr><td>d</td><td>✓</td><td>✓</td><td>✓</td><td><code>serve-d</code></td></tr>
