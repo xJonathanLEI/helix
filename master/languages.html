@@ -166,6 +166,9 @@ auto-LSP-formatting in Rust:</p>
 </ol>
 <pre><code class="language-toml"># in &lt;config_dir&gt;/helix/languages.toml
 
+[language-server.mylang-lsp]
+command = &quot;mylang-lsp&quot;
+
 [[language]]
 name = &quot;rust&quot;
 auto-format = false
@@ -186,12 +189,13 @@ injection-regex = &quot;mylang&quot;
 file-types = [&quot;mylang&quot;, &quot;myl&quot;]
 comment-token = &quot;#&quot;
 indent = { tab-width = 2, unit = &quot;  &quot; }
-language-server = { command = &quot;mylang-lsp&quot;, args = [&quot;--stdio&quot;], environment = { &quot;ENV1&quot; = &quot;value1&quot;, &quot;ENV2&quot; = &quot;value2&quot; } }
 formatter = { command = &quot;mylang-formatter&quot; , args = [&quot;--stdin&quot;] }
+language-servers = [ &quot;mylang-lsp&quot; ]
 </code></pre>
 <p>These configuration keys are available:</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>name</code></td><td>The name of the language</td></tr>
+<tr><td><code>language-id</code></td><td>The language-id for language servers, checkout the table at <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem">TextDocumentItem</a> for the right id</td></tr>
 <tr><td><code>scope</code></td><td>A string like <code>source.js</code> that identifies the language. Currently, we strive to match the scope names used by popular TextMate grammars and by the Linguist library. Usually <code>source.&lt;name&gt;</code> or <code>text.&lt;name&gt;</code> in case of markup languages</td></tr>
 <tr><td><code>injection-regex</code></td><td>regex pattern that will be tested against a language name in order to determine whether this language should be used for a potential <a href="https://tree-sitter.github.io/tree-sitter/syntax-highlighting#language-injection">language injection</a> site.</td></tr>
 <tr><td><code>file-types</code></td><td>The filetypes of the language, for example <code>[&quot;yml&quot;, &quot;yaml&quot;]</code>. See the file-type detection section below.</td></tr>
@@ -201,8 +205,7 @@ formatter = { command = &quot;mylang-formatter&quot; , args = [&quot;--stdin&quo
 <tr><td><code>diagnostic-severity</code></td><td>Minimal severity of diagnostic for it to be displayed. (Allowed values: <code>Error</code>, <code>Warning</code>, <code>Info</code>, <code>Hint</code>)</td></tr>
 <tr><td><code>comment-token</code></td><td>The token to use as a comment-token</td></tr>
 <tr><td><code>indent</code></td><td>The indent to use. Has sub keys <code>unit</code> (the text inserted into the document when indenting; usually set to N spaces or <code>&quot;\t&quot;</code> for tabs) and <code>tab-width</code> (the number of spaces rendered for a tab)</td></tr>
-<tr><td><code>language-server</code></td><td>The Language Server to run. See the Language Server configuration section below.</td></tr>
-<tr><td><code>config</code></td><td>Language Server configuration</td></tr>
+<tr><td><code>language-servers</code></td><td>The Language Servers used for this language. See below for more information in the section <a href="#configuring-language-servers-for-a-language">Configuring Language Servers for a language</a></td></tr>
 <tr><td><code>grammar</code></td><td>The tree-sitter grammar to use (defaults to the value of <code>name</code>)</td></tr>
 <tr><td><code>formatter</code></td><td>The formatter for the language, it will take precedence over the lsp when defined. The formatter must be able to take the original file as input from stdin and write the formatted file to stdout</td></tr>
 <tr><td><code>text-width</code></td><td>Maximum line length. Used for the <code>:reflow</code> command and soft-wrapping if <code>soft-wrap.wrap-at-text-width</code> is set, defaults to <code>editor.text-width</code></td></tr>
@@ -231,26 +234,81 @@ in <code>.git</code> directories. Note: <code>/</code> is used as the directory 
 replaced at runtime with the appropriate path separator for the operating
 system, so this rule would match against <code>.git\config</code> files on Windows.</li>
 </ol>
-<h3 id="language-server-configuration"><a class="header" href="#language-server-configuration">Language Server configuration</a></h3>
-<p>The <code>language-server</code> field takes the following keys:</p>
+<h2 id="language-server-configuration"><a class="header" href="#language-server-configuration">Language Server configuration</a></h2>
+<p>Language servers are configured separately in the table <code>language-server</code> in the same file as the languages <code>languages.toml</code></p>
+<p>For example:</p>
+<pre><code class="language-toml">[language-server.mylang-lsp]
+command = &quot;mylang-lsp&quot;
+args = [&quot;--stdio&quot;]
+config = { provideFormatter = true }
+environment = { &quot;ENV1&quot; = &quot;value1&quot;, &quot;ENV2&quot; = &quot;value2&quot; }
+
+[language-server.efm-lsp-prettier]
+command = &quot;efm-langserver&quot;
+
+[language-server.efm-lsp-prettier.config]
+documentFormatting = true
+languages = { typescript = [ { formatCommand =&quot;prettier --stdin-filepath ${INPUT}&quot;, formatStdin = true } ] }
+</code></pre>
+<p>These are the available options for a language server.</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>command</code></td><td>The name of the language server binary to execute. Binaries must be in <code>$PATH</code></td></tr>
+<tr><td><code>command</code></td><td>The name or path of the language server binary to execute. Binaries must be in <code>$PATH</code></td></tr>
 <tr><td><code>args</code></td><td>A list of arguments to pass to the language server binary</td></tr>
+<tr><td><code>config</code></td><td>LSP initialization options</td></tr>
 <tr><td><code>timeout</code></td><td>The maximum time a request to the language server may take, in seconds. Defaults to <code>20</code></td></tr>
-<tr><td><code>language-id</code></td><td>The language name to pass to the language server. Some language servers support multiple languages and use this field to determine which one is being served in a buffer</td></tr>
 <tr><td><code>environment</code></td><td>Any environment variables that will be used when starting the language server <code>{ &quot;KEY1&quot; = &quot;Value1&quot;, &quot;KEY2&quot; = &quot;Value2&quot; }</code></td></tr>
 </tbody></table>
 </div>
-<p>The top-level <code>config</code> field is used to configure the LSP initialization options. A <code>format</code>
-sub-table within <code>config</code> can be used to pass extra formatting options to
-<a href="https://github.com/microsoft/language-server-protocol/blob/gh-pages/_specifications/specification-3-16.md#document-formatting-request--leftwards_arrow_with_hook">Document Formatting Requests</a>.
+<p>A <code>format</code> sub-table within <code>config</code> can be used to pass extra formatting options to
+<a href="https://github.com/microsoft/language-server-protocol/blob/gh-pages/_specifications/specification-3-17.md#document-formatting-request--leftwards_arrow_with_hook">Document Formatting Requests</a>.
 For example with typescript:</p>
-<pre><code class="language-toml">[[language]]
-name = &quot;typescript&quot;
-auto-format = true
+<pre><code class="language-toml">[language-server.typescript-language-server]
 # pass format options according to https://github.com/typescript-language-server/typescript-language-server#workspacedidchangeconfiguration omitting the &quot;[language].format.&quot; prefix.
 config = { format = { &quot;semicolons&quot; = &quot;insert&quot;, &quot;insertSpaceBeforeFunctionParenthesis&quot; = true } }
 </code></pre>
+<h3 id="configuring-language-servers-for-a-language"><a class="header" href="#configuring-language-servers-for-a-language">Configuring Language Servers for a language</a></h3>
+<p>The <code>language-servers</code> attribute in a language tells helix which language servers are used for this language.</p>
+<p>They have to be defined in the <code>[language-server]</code> table as described in the previous section.</p>
+<p>Different languages can use the same language server instance, e.g. <code>typescript-language-server</code> is used for javascript, jsx, tsx and typescript by default.</p>
+<p>In case multiple language servers are specified in the <code>language-servers</code> attribute of a <code>language</code>,
+it's often useful to only enable/disable certain language-server features for these language servers.</p>
+<p>For example <code>efm-lsp-prettier</code> of the previous example is used only with a formatting command <code>prettier</code>,
+so everything else should be handled by the <code>typescript-language-server</code> (which is configured by default)
+The language configuration for typescript could look like this:</p>
+<pre><code class="language-toml">[[language]]
+name = &quot;typescript&quot;
+language-servers = [ { name = &quot;efm-lsp-prettier&quot;, only-features = [ &quot;format&quot; ] }, &quot;typescript-language-server&quot; ]
+</code></pre>
+<p>or equivalent:</p>
+<pre><code class="language-toml">[[language]]
+name = &quot;typescript&quot;
+language-servers = [ { name = &quot;typescript-language-server&quot;, except-features = [ &quot;format&quot; ] }, &quot;efm-lsp-prettier&quot; ]
+</code></pre>
+<p>Each requested LSP feature is prioritized in the order of the <code>language-servers</code> array.
+For example the first <code>goto-definition</code> supported language server (in this case <code>typescript-language-server</code>) will be taken for the relevant LSP request (command <code>goto_definition</code>).
+The features <code>diagnostics</code>, <code>code-action</code>, <code>completion</code>, <code>document-symbols</code> and <code>workspace-symbols</code> are an exception to that rule, as they are working for all language servers at the same time and are merged together, if enabled for the language.
+If no <code>except-features</code> or <code>only-features</code> is given all features for the language server are enabled.
+If a language server itself doesn't support a feature the next language server array entry will be tried (and so on).</p>
+<p>The list of supported features is:</p>
+<ul>
+<li><code>format</code></li>
+<li><code>goto-definition</code></li>
+<li><code>goto-declaration</code></li>
+<li><code>goto-type-definition</code></li>
+<li><code>goto-reference</code></li>
+<li><code>goto-implementation</code></li>
+<li><code>signature-help</code></li>
+<li><code>hover</code></li>
+<li><code>document-highlight</code></li>
+<li><code>completion</code></li>
+<li><code>code-action</code></li>
+<li><code>workspace-command</code></li>
+<li><code>document-symbols</code></li>
+<li><code>workspace-symbols</code></li>
+<li><code>diagnostics</code></li>
+<li><code>rename-symbol</code></li>
+<li><code>inlay-hints</code></li>
+</ul>
 <h2 id="tree-sitter-grammar-configuration"><a class="header" href="#tree-sitter-grammar-configuration">Tree-sitter grammar configuration</a></h2>
 <p>The source for a language's tree-sitter grammar is specified in a <code>[[grammar]]</code>
 section in <code>languages.toml</code>. For example:</p>
