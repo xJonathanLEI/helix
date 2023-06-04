@@ -239,7 +239,9 @@ sudo dnf install helix
 <p>Additionally, a <a href="https://aur.archlinux.org/packages/helix-git/">helix-git</a> package is available
 in the AUR, which builds the master branch.</p>
 <h3 id="nixos"><a class="header" href="#nixos">NixOS</a></h3>
-<p>Helix is available as a <a href="https://nixos.wiki/wiki/Flakes">flake</a> in the project
+<p>Helix is available in <a href="https://github.com/nixos/nixpkgs">nixpkgs</a> through the <code>helix</code> attribute,
+the unstable channel usually carries the latest release.</p>
+<p>Helix is also available as a <a href="https://nixos.wiki/wiki/Flakes">flake</a> in the project
 root. Use <code>nix develop</code> to spin up a reproducible development shell. Outputs are
 cached for each push to master using <a href="https://www.cachix.org/">Cachix</a>. The
 flake is configured to automatically make use of this cache assuming the user
@@ -1052,7 +1054,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>c</td><td>✓</td><td>✓</td><td>✓</td><td><code>clangd</code></td></tr>
 <tr><td>c-sharp</td><td>✓</td><td>✓</td><td></td><td><code>OmniSharp</code></td></tr>
 <tr><td>cabal</td><td></td><td></td><td></td><td></td></tr>
-<tr><td>cairo</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>cairo</td><td>✓</td><td>✓</td><td>✓</td><td><code>cairo-language-server</code></td></tr>
 <tr><td>capnp</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>clojure</td><td>✓</td><td></td><td></td><td><code>clojure-lsp</code></td></tr>
 <tr><td>cmake</td><td>✓</td><td>✓</td><td>✓</td><td><code>cmake-language-server</code></td></tr>
@@ -1850,7 +1852,7 @@ berry = &quot;#2A2A4D&quot;
 <tr><td><code>ui.window</code></td><td>Borderlines separating splits</td></tr>
 <tr><td><code>ui.help</code></td><td>Description box for commands</td></tr>
 <tr><td><code>ui.text</code></td><td>Command prompts, popup text, etc.</td></tr>
-<tr><td><code>ui.text.focus</code></td><td></td></tr>
+<tr><td><code>ui.text.focus</code></td><td>The currently selected line in the picker</td></tr>
 <tr><td><code>ui.text.inactive</code></td><td>Same as <code>ui.text</code> but when the text is inactive (e.g. suggestions)</td></tr>
 <tr><td><code>ui.text.info</code></td><td>The key: command text in <code>ui.popup.info</code> boxes</td></tr>
 <tr><td><code>ui.virtual.ruler</code></td><td>Ruler columns (see the <a href="./configuration.html#editor-section"><code>editor.rulers</code> config</a>)</td></tr>
