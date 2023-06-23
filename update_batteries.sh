@@ -18,7 +18,7 @@ INTERESTING_PRS=(
   # Changed file picker
   5645
   # Inline Diagnostics
-  6417
+  # 6417 (conflicts)
 )
 
 # Makes the latest PR head available at a local branch
