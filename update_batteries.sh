@@ -15,8 +15,6 @@ INTERESTING_PRS=(
   5260
   # Make mouse click extend selection in select mode
   5436
-  # Only render the auto-complete menu if it intersects with signature help
-  # 5523 (conflicts)
   # Changed file picker
   5645
   # Inline Diagnostics
