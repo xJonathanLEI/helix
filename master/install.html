@@ -275,10 +275,13 @@ You can get <a href="https://www.microsoft.com/p/app-installer/9nblggh4nns1#acti
 </code></pre>
 <h2 id="building-from-source"><a class="header" href="#building-from-source">Building from source</a></h2>
 <p>Requirements:</p>
+<p>Clone the Helix GitHub repository into a directory of your choice. The
+examples in this documentation assume installation into either <code>~/src/</code> on
+Linux and macOS, or <code>%userprofile%\src\</code> on Windows.</p>
 <ul>
 <li>The <a href="https://www.rust-lang.org/tools/install">Rust toolchain</a></li>
 <li>The <a href="https://git-scm.com/">Git version control system</a></li>
-<li>A c++14 compatible compiler to build the tree-sitter grammars, for example GCC or Clang</li>
+<li>A C++14 compatible compiler to build the tree-sitter grammars, for example GCC or Clang</li>
 </ul>
 <p>If you are using the <code>musl-libc</code> standard library instead of <code>glibc</code> the following environment variable must be set during the build to ensure tree-sitter grammars can be loaded correctly:</p>
 <pre><code class="language-sh">RUSTFLAGS=&quot;-C target-feature=-crt-static&quot;
@@ -305,12 +308,15 @@ the <code>runtime</code> directory within the user's helix config directory (mor
 </blockquote>
 <h3 id="configuring-helixs-runtime-files"><a class="header" href="#configuring-helixs-runtime-files">Configuring Helix's runtime files</a></h3>
 <h4 id="linux-and-macos"><a class="header" href="#linux-and-macos">Linux and macOS</a></h4>
-<p>Either set the <code>HELIX_RUNTIME</code> environment variable to point to the runtime files and add it to your <code>~/.bashrc</code> or equivalent:</p>
-<pre><code class="language-sh">HELIX_RUNTIME=/home/user-name/src/helix/runtime
+<p>The <strong>runtime</strong> directory is one below the Helix source, so either set a
+<code>HELIX_RUNTIME</code> environment variable to point to that directory and add it to
+your <code>~/.bashrc</code> or equivalent:</p>
+<pre><code class="language-sh">HELIX_RUNTIME=~/src/helix/runtime
 </code></pre>
-<p>Or, create a symlink in <code>~/.config/helix</code> that links to the source code directory:</p>
-<pre><code class="language-sh">ln -s $PWD/runtime ~/.config/helix/runtime
+<p>Or, create a symbolic link:</p>
+<pre><code class="language-sh">ln -Ts $PWD/runtime ~/.config/helix/runtime
 </code></pre>
+<p>If the above command fails to create a symbolic link because the file exists either move <code>~/.config/helix/runtime</code> to a new location or delete it, then run the symlink command above again. </p>
 <h4 id="windows-1"><a class="header" href="#windows-1">Windows</a></h4>
 <p>Either set the <code>HELIX_RUNTIME</code> environment variable to point to the runtime files using the Windows setting (search for
 <code>Edit environment variables for your account</code>) or use the <code>setx</code> command in
