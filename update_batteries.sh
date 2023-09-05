@@ -7,8 +7,6 @@ set -x
 
 # The list of PRs to pick here:
 INTERESTING_PRS=(
-  # Make search commands respect register selection
-  5244
   # Support going to specific positions in file
   5260
   # Make mouse click extend selection in select mode
