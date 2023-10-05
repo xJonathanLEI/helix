@@ -15,8 +15,6 @@ INTERESTING_PRS=(
   5645
   # Inline Diagnostics
   # 6417 (conflicts)
-  # Detect tmux clipboard provider on macOS
-  8182
 )
 
 # Makes the latest PR head available at a local branch
