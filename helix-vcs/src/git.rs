@@ -11,9 +11,8 @@ use std::path::Path;
 use std::sync::Arc;
 
 use gix::index::{entry::Mode, State};
-use gix::objs::tree::EntryKind;
 use gix::sec::trust::DefaultForLevel;
-use gix::{Commit, ObjectId, Repository, ThreadSafeRepository};
+use gix::{ObjectId, Repository, ThreadSafeRepository};
 use ignore::WalkBuilder;
 use sha1::Digest;
 
@@ -121,17 +120,15 @@ impl Git {
             .work_dir()
             .ok_or_else(|| anyhow::anyhow!("working tree not found"))?;
 
-        // TODO: allow diffing against another ref
-        let head_tree = repo.head_commit()?.tree()?;
-        let head_state = State::from_tree(&head_tree.id, &repo.objects)?;
+        let (base_state, _) = repo.open_index()?.into_parts();
 
         let mut head_tree_set = HashSet::new();
         let mut submodule_paths = vec![];
 
         let mut raw_changes = RawChanges::default();
 
-        for item in head_state.entries() {
-            let full_path = work_dir.join(&PathBuf::from(item.path(&head_state).to_string()));
+        for item in base_state.entries() {
+            let full_path = work_dir.join(&PathBuf::from(item.path(&base_state).to_string()));
 
             if item.mode == Mode::COMMIT {
                 submodule_paths.push(full_path);
@@ -225,8 +222,8 @@ impl DiffProvider for Git {
         let repo = Git::open_repo(repo_dir, None)
             .context("failed to open git repo")?
             .to_thread_local();
-        let head = repo.head_commit()?;
-        let file_oid = find_file_in_commit(&repo, &head, file)?;
+        let (base_state, _) = repo.open_index()?.into_parts();
+        let file_oid = find_file_in_state(&repo, &base_state, file)?;
 
         let file_object = repo.find_object(file_oid)?;
         let data = file_object.detach().data;
@@ -347,21 +344,35 @@ impl From<RawChanges> for Vec<FileChange> {
     }
 }
 
-/// Finds the object that contains the contents of a file at a specific commit.
-fn find_file_in_commit(repo: &Repository, commit: &Commit, file: &Path) -> Result<ObjectId> {
+/// Finds the object that contains the contents of a file at a specific index state.
+fn find_file_in_state(repo: &Repository, state: &State, file: &Path) -> Result<ObjectId> {
     let repo_dir = repo.work_dir().context("repo has no worktree")?;
-    let rel_path = file.strip_prefix(repo_dir)?;
-    let tree = commit.tree()?;
-    let tree_entry = tree
-        .lookup_entry_by_path(rel_path, &mut Vec::new())?
-        .context("file is untracked")?;
-    match tree_entry.mode().kind() {
-        // not a file, everything is new, do not show diff
-        mode @ (EntryKind::Tree | EntryKind::Commit | EntryKind::Link) => {
-            bail!("entry at {} is not a file but a {mode:?}", file.display())
+    let rel_path = file.strip_prefix(repo_dir)?.as_os_str();
+
+    let rel_path = {
+        #[cfg(unix)]
+        {
+            use std::os::unix::prelude::OsStrExt;
+            rel_path.as_bytes()
         }
+
+        #[cfg(not(unix))]
+        {
+            rel_path
+                .to_str()
+                .ok_or_else(|| anyhow::anyhow!("unsupported OsStr"))?
+                .as_bytes()
+        }
+    };
+
+    let tree_entry = state
+        .entry_by_path_and_stage(rel_path.into(), 0)
+        .context("file is untracked")?;
+    match tree_entry.mode {
         // found a file
-        EntryKind::Blob | EntryKind::BlobExecutable => Ok(tree_entry.object_id()),
+        Mode::FILE | Mode::FILE_EXECUTABLE => Ok(tree_entry.id),
+        // not a file, everything is new, do not show diff
+        mode => bail!("entry at {} is not a file but a {mode:?}", file.display()),
     }
 }
 
