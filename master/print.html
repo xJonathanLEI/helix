@@ -204,6 +204,7 @@ For everything else (e.g., how to install supported language servers), see the <
 <li><a href="install.html#macos">macOS</a>
 <ul>
 <li><a href="install.html#homebrew-core">Homebrew Core</a></li>
+<li><a href="install.html#macports">MacPorts</a></li>
 </ul>
 </li>
 <li><a href="install.html#windows">Windows</a>
@@ -258,9 +259,7 @@ sudo apt update
 sudo apt install helix
 </code></pre>
 <h3 id="fedorarhel"><a class="header" href="#fedorarhel">Fedora/RHEL</a></h3>
-<p>Enable the <code>COPR</code> repository for Helix:</p>
-<pre><code class="language-sh">sudo dnf copr enable varlad/helix
-sudo dnf install helix
+<pre><code class="language-sh">sudo dnf install helix
 </code></pre>
 <h3 id="arch-linux-extra"><a class="header" href="#arch-linux-extra">Arch Linux extra</a></h3>
 <p>Releases are available in the <code>extra</code> repository:</p>
@@ -298,6 +297,9 @@ Download the official Helix AppImage from the <a href="https://github.com/helix-
 <h2 id="macos"><a class="header" href="#macos">macOS</a></h2>
 <h3 id="homebrew-core"><a class="header" href="#homebrew-core">Homebrew Core</a></h3>
 <pre><code class="language-sh">brew install helix
+</code></pre>
+<h3 id="macports"><a class="header" href="#macports">MacPorts</a></h3>
+<pre><code class="language-sh">port install helix
 </code></pre>
 <h2 id="windows"><a class="header" href="#windows">Windows</a></h2>
 <p>Install on Windows using <a href="https://learn.microsoft.com/en-us/windows/package-manager/winget/">Winget</a>, <a href="https://scoop.sh/">Scoop</a>, <a href="https://chocolatey.org/">Chocolatey</a>
@@ -346,6 +348,9 @@ grammars in the local <code>runtime</code> folder.</p>
 </li>
 </ol>
 <blockquote>
+<p>💡 If you do not want to fetch or build grammars, set an environment variable <code>HELIX_DISABLE_AUTO_GRAMMAR_BUILD</code></p>
+</blockquote>
+<blockquote>
 <p>💡 Tree-sitter grammars can be fetched and compiled if not pre-packaged. Fetch
 grammars with <code>hx --grammar fetch</code> and compile them with
 <code>hx --grammar build</code>. This will install them in
@@ -354,15 +359,15 @@ the <code>runtime</code> directory within the user's helix config directory (mor
 </blockquote>
 <h3 id="configuring-helixs-runtime-files"><a class="header" href="#configuring-helixs-runtime-files">Configuring Helix's runtime files</a></h3>
 <h4 id="linux-and-macos"><a class="header" href="#linux-and-macos">Linux and macOS</a></h4>
-<p>The <strong>runtime</strong> directory is one below the Helix source, so either set a
+<p>The <strong>runtime</strong> directory is one below the Helix source, so either export a
 <code>HELIX_RUNTIME</code> environment variable to point to that directory and add it to
 your <code>~/.bashrc</code> or equivalent:</p>
-<pre><code class="language-sh">HELIX_RUNTIME=~/src/helix/runtime
+<pre><code class="language-sh">export HELIX_RUNTIME=~/src/helix/runtime
 </code></pre>
 <p>Or, create a symbolic link:</p>
 <pre><code class="language-sh">ln -Ts $PWD/runtime ~/.config/helix/runtime
 </code></pre>
-<p>If the above command fails to create a symbolic link because the file exists either move <code>~/.config/helix/runtime</code> to a new location or delete it, then run the symlink command above again. </p>
+<p>If the above command fails to create a symbolic link because the file exists either move <code>~/.config/helix/runtime</code> to a new location or delete it, then run the symlink command above again.</p>
 <h4 id="windows-1"><a class="header" href="#windows-1">Windows</a></h4>
 <p>Either set the <code>HELIX_RUNTIME</code> environment variable to point to the runtime files using the Windows setting (search for
 <code>Edit environment variables for your account</code>) or use the <code>setx</code> command in
@@ -390,11 +395,29 @@ following order:</p>
 <li><code>runtime/</code> sibling directory to <code>$CARGO_MANIFEST_DIR</code> directory (this is intended for
 developing and testing helix only).</li>
 <li><code>runtime/</code> subdirectory of OS-dependent helix user config directory.</li>
-<li><code>$HELIX_RUNTIME</code>.</li>
+<li><code>$HELIX_RUNTIME</code></li>
+<li>Distribution-specific fallback directory (set at compile time—not run time—
+with the <code>HELIX_DEFAULT_RUNTIME</code> environment variable)</li>
 <li><code>runtime/</code> subdirectory of path to Helix executable.</li>
 </ol>
 <p>This order also sets the priority for selecting which file will be used if multiple runtime
 directories have files with the same name.</p>
+<h4 id="note-to-packagers"><a class="header" href="#note-to-packagers">Note to packagers</a></h4>
+<p>If you are making a package of Helix for end users, to provide a good out of
+the box experience, you should set the <code>HELIX_DEFAULT_RUNTIME</code> environment
+variable at build time (before invoking <code>cargo build</code>) to a directory which
+will store the final runtime files after installation. For example, say you want
+to package the runtime into <code>/usr/lib/helix/runtime</code>. The rough steps a build
+script could follow are:</p>
+<ol>
+<li><code>export HELIX_DEFAULT_RUNTIME=/usr/lib/helix/runtime</code></li>
+<li><code>cargo build --profile opt --locked --path helix-term</code></li>
+<li><code>cp -r runtime $BUILD_DIR/usr/lib/helix/</code></li>
+<li><code>cp target/opt/hx $BUILD_DIR/usr/bin/hx</code></li>
+</ol>
+<p>This way the resulting <code>hx</code> binary will always look for its runtime directory in
+<code>/usr/lib/helix/runtime</code> if the user has no custom runtime in <code>~/.config/helix</code>
+or <code>HELIX_RUNTIME</code>.</p>
 <h3 id="validating-the-installation"><a class="header" href="#validating-the-installation">Validating the installation</a></h3>
 <p>To make sure everything is set up as expected you should run the Helix health
 check:</p>
@@ -471,8 +494,8 @@ These registers are used as defaults:</p>
 <tr><td><code>#</code></td><td>Selection indices (first selection is <code>1</code>, second is <code>2</code>, etc.)</td><td>This register is not writable</td></tr>
 <tr><td><code>.</code></td><td>Contents of the current selections</td><td>This register is not writable</td></tr>
 <tr><td><code>%</code></td><td>Name of the current file</td><td>This register is not writable</td></tr>
-<tr><td><code>*</code></td><td>Reads from the system clipboard</td><td>Joins and yanks to the system clipboard</td></tr>
-<tr><td><code>+</code></td><td>Reads from the primary clipboard</td><td>Joins and yanks to the primary clipboard</td></tr>
+<tr><td><code>+</code></td><td>Reads from the system clipboard</td><td>Joins and yanks to the system clipboard</td></tr>
+<tr><td><code>*</code></td><td>Reads from the primary clipboard</td><td>Joins and yanks to the primary clipboard</td></tr>
 </tbody></table>
 </div>
 <p>When yanking multiple selections to the clipboard registers, the selections
@@ -629,7 +652,7 @@ selection to the &quot;func&quot; <code>identifier</code>.</p>
 <p>💡 Mappings marked (<strong>TS</strong>) require a tree-sitter grammar for the file type.</p>
 </blockquote>
 <h2 id="normal-mode"><a class="header" href="#normal-mode">Normal mode</a></h2>
-<p>Normal mode is the default mode when you launch helix. Return to it from other modes by typing <code>Escape</code>.</p>
+<p>Normal mode is the default mode when you launch helix. You can return to it from other modes by pressing the <code>Escape</code> key.</p>
 <h3 id="movement"><a class="header" href="#movement">Movement</a></h3>
 <blockquote>
 <p>NOTE: Unlike Vim, <code>f</code>, <code>F</code>, <code>t</code> and <code>T</code> are not confined to the current line.</p>
@@ -791,7 +814,7 @@ useful when you're simply looking over text and not actively editing it.</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th><th>Command</th></tr></thead><tbody>
 <tr><td><code>g</code></td><td>Go to line number <code>&lt;n&gt;</code> else start of file</td><td><code>goto_file_start</code></td></tr>
 <tr><td><code>e</code></td><td>Go to the end of the file</td><td><code>goto_last_line</code></td></tr>
-<tr><td><code>f</code></td><td>Go to files in the selection</td><td><code>goto_file</code></td></tr>
+<tr><td><code>f</code></td><td>Go to files in the selections</td><td><code>goto_file</code></td></tr>
 <tr><td><code>h</code></td><td>Go to the start of the line</td><td><code>goto_line_start</code></td></tr>
 <tr><td><code>l</code></td><td>Go to the end of the line</td><td><code>goto_line_end</code></td></tr>
 <tr><td><code>s</code></td><td>Go to first non-whitespace character of the line</td><td><code>goto_first_nonwhitespace</code></td></tr>
@@ -832,8 +855,8 @@ useful when you're simply looking over text and not actively editing it.</p>
 <tr><td><code>w</code>, <code>Ctrl-w</code></td><td>Switch to next window</td><td><code>rotate_view</code></td></tr>
 <tr><td><code>v</code>, <code>Ctrl-v</code></td><td>Vertical right split</td><td><code>vsplit</code></td></tr>
 <tr><td><code>s</code>, <code>Ctrl-s</code></td><td>Horizontal bottom split</td><td><code>hsplit</code></td></tr>
-<tr><td><code>f</code></td><td>Go to files in the selection in horizontal splits</td><td><code>goto_file</code></td></tr>
-<tr><td><code>F</code></td><td>Go to files in the selection in vertical splits</td><td><code>goto_file</code></td></tr>
+<tr><td><code>f</code></td><td>Go to files in the selections in horizontal splits</td><td><code>goto_file</code></td></tr>
+<tr><td><code>F</code></td><td>Go to files in the selections in vertical splits</td><td><code>goto_file</code></td></tr>
 <tr><td><code>h</code>, <code>Ctrl-h</code>, <code>Left</code></td><td>Move to left split</td><td><code>jump_view_left</code></td></tr>
 <tr><td><code>j</code>, <code>Ctrl-j</code>, <code>Down</code></td><td>Move to split below</td><td><code>jump_view_down</code></td></tr>
 <tr><td><code>k</code>, <code>Ctrl-k</code>, <code>Up</code></td><td>Move to split above</td><td><code>jump_view_up</code></td></tr>
@@ -1032,7 +1055,7 @@ you to selectively add search terms to your selections.</p>
 <tr><td><code>:write-buffer-close!</code>, <code>:wbc!</code></td><td>Force write changes to disk creating necessary subdirectories and closes the buffer. Accepts an optional path (:write-buffer-close! some/path.txt)</td></tr>
 <tr><td><code>:new</code>, <code>:n</code></td><td>Create a new scratch buffer.</td></tr>
 <tr><td><code>:format</code>, <code>:fmt</code></td><td>Format the file using the LSP formatter.</td></tr>
-<tr><td><code>:indent-style</code></td><td>Set the indentation style for editing. ('t' for tabs or 1-8 for number of spaces.)</td></tr>
+<tr><td><code>:indent-style</code></td><td>Set the indentation style for editing. ('t' for tabs or 1-16 for number of spaces.)</td></tr>
 <tr><td><code>:line-ending</code></td><td>Set the document's default line ending. Options: crlf, lf.</td></tr>
 <tr><td><code>:earlier</code>, <code>:ear</code></td><td>Jump back to an earlier point in edit history. Accepts a number of steps or a time span.</td></tr>
 <tr><td><code>:later</code>, <code>:lat</code></td><td>Jump to a later point in edit history. Accepts a number of steps or a time span.</td></tr>
@@ -1100,6 +1123,7 @@ you to selectively add search terms to your selections.</p>
 <tr><td><code>:reset-diff-change</code>, <code>:diffget</code>, <code>:diffg</code></td><td>Reset the diff change at the cursor position.</td></tr>
 <tr><td><code>:clear-register</code></td><td>Clear given register. If no argument is provided, clear all registers.</td></tr>
 <tr><td><code>:redraw</code></td><td>Clear and re-render the whole UI</td></tr>
+<tr><td><code>:move</code></td><td>Move the current buffer and its corresponding file to a different path</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="language-support"><a class="header" href="#language-support">Language Support</a></h1>
 <p>The following languages and Language Servers are supported. To use
@@ -1109,6 +1133,7 @@ appropriate Language Server.</p>
 <p>Also see the <a href="./languages.html">Language Configuration</a> docs and the <a href="./guides/adding_languages.html">Adding
 Languages</a> guide for more language configuration information.</p>
 <div class="table-wrapper"><table><thead><tr><th>Language</th><th>Syntax Highlighting</th><th>Treesitter Textobjects</th><th>Auto Indent</th><th>Default LSP</th></tr></thead><tbody>
+<tr><td>agda</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>astro</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>awk</td><td>✓</td><td>✓</td><td></td><td><code>awk-language-server</code></td></tr>
 <tr><td>bash</td><td>✓</td><td>✓</td><td>✓</td><td><code>bash-language-server</code></td></tr>
@@ -1119,20 +1144,21 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>blueprint</td><td>✓</td><td></td><td></td><td><code>blueprint-compiler</code></td></tr>
 <tr><td>c</td><td>✓</td><td>✓</td><td>✓</td><td><code>clangd</code></td></tr>
 <tr><td>c-sharp</td><td>✓</td><td>✓</td><td></td><td><code>OmniSharp</code></td></tr>
-<tr><td>cabal</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>cabal</td><td></td><td></td><td></td><td><code>haskell-language-server-wrapper</code></td></tr>
 <tr><td>cairo</td><td>✓</td><td>✓</td><td>✓</td><td><code>cairo-language-server</code></td></tr>
 <tr><td>capnp</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>clojure</td><td>✓</td><td></td><td></td><td><code>clojure-lsp</code></td></tr>
 <tr><td>cmake</td><td>✓</td><td>✓</td><td>✓</td><td><code>cmake-language-server</code></td></tr>
 <tr><td>comment</td><td>✓</td><td></td><td></td><td></td></tr>
-<tr><td>common-lisp</td><td>✓</td><td></td><td></td><td><code>cl-lsp</code></td></tr>
+<tr><td>common-lisp</td><td>✓</td><td></td><td>✓</td><td><code>cl-lsp</code></td></tr>
 <tr><td>cpon</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>cpp</td><td>✓</td><td>✓</td><td>✓</td><td><code>clangd</code></td></tr>
 <tr><td>crystal</td><td>✓</td><td>✓</td><td></td><td><code>crystalline</code></td></tr>
-<tr><td>css</td><td>✓</td><td></td><td></td><td><code>vscode-css-language-server</code></td></tr>
+<tr><td>css</td><td>✓</td><td></td><td>✓</td><td><code>vscode-css-language-server</code></td></tr>
 <tr><td>cue</td><td>✓</td><td></td><td></td><td><code>cuelsp</code></td></tr>
 <tr><td>d</td><td>✓</td><td>✓</td><td>✓</td><td><code>serve-d</code></td></tr>
 <tr><td>dart</td><td>✓</td><td></td><td>✓</td><td><code>dart</code></td></tr>
+<tr><td>dbml</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>devicetree</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>dhall</td><td>✓</td><td>✓</td><td></td><td><code>dhall-lsp-server</code></td></tr>
 <tr><td>diff</td><td>✓</td><td></td><td></td><td></td></tr>
@@ -1163,7 +1189,8 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>git-rebase</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>gleam</td><td>✓</td><td>✓</td><td></td><td><code>gleam</code></td></tr>
 <tr><td>glsl</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
-<tr><td>go</td><td>✓</td><td>✓</td><td>✓</td><td><code>gopls</code></td></tr>
+<tr><td>gn</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>go</td><td>✓</td><td>✓</td><td>✓</td><td><code>gopls</code>, <code>golangci-lint-langserver</code></td></tr>
 <tr><td>godot-resource</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>gomod</td><td>✓</td><td></td><td></td><td><code>gopls</code></td></tr>
 <tr><td>gotmpl</td><td>✓</td><td></td><td></td><td><code>gopls</code></td></tr>
@@ -1174,12 +1201,14 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>haskell-persistent</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>hcl</td><td>✓</td><td></td><td>✓</td><td><code>terraform-ls</code></td></tr>
 <tr><td>heex</td><td>✓</td><td>✓</td><td></td><td><code>elixir-ls</code></td></tr>
+<tr><td>hocon</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>hosts</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>html</td><td>✓</td><td></td><td></td><td><code>vscode-html-language-server</code></td></tr>
 <tr><td>hurl</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>idris</td><td></td><td></td><td></td><td><code>idris2-lsp</code></td></tr>
 <tr><td>iex</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>ini</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>janet</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>java</td><td>✓</td><td>✓</td><td>✓</td><td><code>jdtls</code></td></tr>
 <tr><td>javascript</td><td>✓</td><td>✓</td><td>✓</td><td><code>typescript-language-server</code></td></tr>
 <tr><td>jinja</td><td>✓</td><td></td><td></td><td></td></tr>
@@ -1190,7 +1219,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>jsx</td><td>✓</td><td>✓</td><td>✓</td><td><code>typescript-language-server</code></td></tr>
 <tr><td>julia</td><td>✓</td><td>✓</td><td>✓</td><td><code>julia</code></td></tr>
 <tr><td>just</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
-<tr><td>kdl</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>kdl</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
 <tr><td>kotlin</td><td>✓</td><td></td><td></td><td><code>kotlin-language-server</code></td></tr>
 <tr><td>latex</td><td>✓</td><td>✓</td><td></td><td><code>texlab</code></td></tr>
 <tr><td>lean</td><td>✓</td><td></td><td></td><td><code>lean</code></td></tr>
@@ -1198,8 +1227,10 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>llvm</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
 <tr><td>llvm-mir</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
 <tr><td>llvm-mir-yaml</td><td>✓</td><td></td><td>✓</td><td></td></tr>
+<tr><td>log</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>lpf</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>lua</td><td>✓</td><td>✓</td><td>✓</td><td><code>lua-language-server</code></td></tr>
-<tr><td>make</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>make</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>markdoc</td><td>✓</td><td></td><td></td><td><code>markdoc-ls</code></td></tr>
 <tr><td>markdown</td><td>✓</td><td></td><td></td><td><code>marksman</code></td></tr>
 <tr><td>markdown.inline</td><td>✓</td><td></td><td></td><td></td></tr>
@@ -1212,7 +1243,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>nickel</td><td>✓</td><td></td><td>✓</td><td><code>nls</code></td></tr>
 <tr><td>nim</td><td>✓</td><td>✓</td><td>✓</td><td><code>nimlangserver</code></td></tr>
 <tr><td>nix</td><td>✓</td><td></td><td></td><td><code>nil</code></td></tr>
-<tr><td>nu</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>nu</td><td>✓</td><td></td><td></td><td><code>nu</code></td></tr>
 <tr><td>nunjucks</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>ocaml</td><td>✓</td><td></td><td>✓</td><td><code>ocamllsp</code></td></tr>
 <tr><td>ocaml-interface</td><td>✓</td><td></td><td></td><td><code>ocamllsp</code></td></tr>
@@ -1230,13 +1261,13 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>ponylang</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
 <tr><td>prisma</td><td>✓</td><td></td><td></td><td><code>prisma-language-server</code></td></tr>
 <tr><td>prolog</td><td></td><td></td><td></td><td><code>swipl</code></td></tr>
-<tr><td>protobuf</td><td>✓</td><td></td><td>✓</td><td><code>bufls</code>, <code>pb</code></td></tr>
+<tr><td>protobuf</td><td>✓</td><td>✓</td><td>✓</td><td><code>bufls</code>, <code>pb</code></td></tr>
 <tr><td>prql</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>purescript</td><td>✓</td><td>✓</td><td></td><td><code>purescript-language-server</code></td></tr>
 <tr><td>python</td><td>✓</td><td>✓</td><td>✓</td><td><code>pylsp</code></td></tr>
 <tr><td>qml</td><td>✓</td><td></td><td>✓</td><td><code>qmlls</code></td></tr>
 <tr><td>r</td><td>✓</td><td></td><td></td><td><code>R</code></td></tr>
-<tr><td>racket</td><td>✓</td><td></td><td></td><td><code>racket</code></td></tr>
+<tr><td>racket</td><td>✓</td><td></td><td>✓</td><td><code>racket</code></td></tr>
 <tr><td>regex</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>rego</td><td>✓</td><td></td><td></td><td><code>regols</code></td></tr>
 <tr><td>rescript</td><td>✓</td><td>✓</td><td></td><td><code>rescript-language-server</code></td></tr>
@@ -1247,10 +1278,11 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>ruby</td><td>✓</td><td>✓</td><td>✓</td><td><code>solargraph</code></td></tr>
 <tr><td>rust</td><td>✓</td><td>✓</td><td>✓</td><td><code>rust-analyzer</code></td></tr>
 <tr><td>sage</td><td>✓</td><td>✓</td><td></td><td></td></tr>
-<tr><td>scala</td><td>✓</td><td></td><td>✓</td><td><code>metals</code></td></tr>
-<tr><td>scheme</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>scala</td><td>✓</td><td>✓</td><td>✓</td><td><code>metals</code></td></tr>
+<tr><td>scheme</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>scss</td><td>✓</td><td></td><td></td><td><code>vscode-css-language-server</code></td></tr>
 <tr><td>slint</td><td>✓</td><td></td><td>✓</td><td><code>slint-lsp</code></td></tr>
+<tr><td>smali</td><td>✓</td><td></td><td>✓</td><td></td></tr>
 <tr><td>smithy</td><td>✓</td><td></td><td></td><td><code>cs</code></td></tr>
 <tr><td>sml</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>solidity</td><td>✓</td><td></td><td></td><td><code>solc</code></td></tr>
@@ -1264,6 +1296,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>t32</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>tablegen</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
 <tr><td>task</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>templ</td><td>✓</td><td></td><td></td><td><code>templ</code></td></tr>
 <tr><td>tfvars</td><td>✓</td><td></td><td>✓</td><td><code>terraform-ls</code></td></tr>
 <tr><td>todotxt</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>toml</td><td>✓</td><td></td><td></td><td><code>taplo</code></td></tr>
@@ -1271,6 +1304,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>tsx</td><td>✓</td><td>✓</td><td>✓</td><td><code>typescript-language-server</code></td></tr>
 <tr><td>twig</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>typescript</td><td>✓</td><td>✓</td><td>✓</td><td><code>typescript-language-server</code></td></tr>
+<tr><td>typst</td><td>✓</td><td></td><td></td><td><code>typst-lsp</code></td></tr>
 <tr><td>ungrammar</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>unison</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>uxntal</td><td>✓</td><td></td><td></td><td></td></tr>
@@ -1348,7 +1382,7 @@ Its settings will be merged with the configuration directory <code>config.toml</
 <tr><td><code>auto-completion</code></td><td>Enable automatic pop up of auto-completion</td><td><code>true</code></td></tr>
 <tr><td><code>auto-format</code></td><td>Enable automatic formatting on save</td><td><code>true</code></td></tr>
 <tr><td><code>auto-save</code></td><td>Enable automatic saving on the focus moving away from Helix. Requires <a href="https://github.com/helix-editor/helix/wiki/Terminal-Support">focus event support</a> from your terminal</td><td><code>false</code></td></tr>
-<tr><td><code>idle-timeout</code></td><td>Time in milliseconds since last keypress before idle timers trigger. Used for autocompletion, set to 0 for instant</td><td><code>400</code></td></tr>
+<tr><td><code>idle-timeout</code></td><td>Time in milliseconds since last keypress before idle timers trigger. Used for autocompletion, set to 0 for instant</td><td><code>250</code></td></tr>
 <tr><td><code>preview-completion-insert</code></td><td>Whether to apply completion item instantly when selected</td><td><code>true</code></td></tr>
 <tr><td><code>completion-trigger-len</code></td><td>The min-length of word under cursor to trigger autocompletion</td><td><code>2</code></td></tr>
 <tr><td><code>completion-replace</code></td><td>Set to <code>true</code> to make completions always replace the entire word and not just the part before the cursor</td><td><code>false</code></td></tr>
@@ -1362,6 +1396,8 @@ Its settings will be merged with the configuration directory <code>config.toml</
 <tr><td><code>workspace-lsp-roots</code></td><td>Directories relative to the workspace root that are treated as LSP roots. Should only be set in <code>.helix/config.toml</code></td><td><code>[]</code></td></tr>
 <tr><td><code>default-line-ending</code></td><td>The line ending to use for new documents. Can be <code>native</code>, <code>lf</code>, <code>crlf</code>, <code>ff</code>, <code>cr</code> or <code>nel</code>. <code>native</code> uses the platform's native line ending (<code>crlf</code> on Windows, otherwise <code>lf</code>).</td><td><code>native</code></td></tr>
 <tr><td><code>insert-final-newline</code></td><td>Whether to automatically insert a trailing line-ending on write if missing</td><td><code>true</code></td></tr>
+<tr><td><code>popup-border</code></td><td>Draw border around <code>popup</code>, <code>menu</code>, <code>all</code>, or <code>none</code></td><td><code>none</code></td></tr>
+<tr><td><code>indent-heuristic</code></td><td>How the indentation for a newly inserted line is computed: <code>simple</code> just copies the indentation level from the previous line, <code>tree-sitter</code> computes the indentation based on the syntax tree and <code>hybrid</code> combines both approaches. If the chosen heuristic is not available, a different one will be used as a fallback (the fallback order being <code>hybrid</code> -&gt; <code>tree-sitter</code> -&gt; <code>simple</code>).</td><td><code>hybrid</code></td></tr>
 </tbody></table>
 </div>
 <h3 id="editorstatusline-section"><a class="header" href="#editorstatusline-section"><code>[editor.statusline]</code> Section</a></h3>
@@ -1448,17 +1484,29 @@ change shape.</p>
 not visible in the Helix file picker and global search.</p>
 <p>All git related options are only enabled in a git repository.</p>
 <div class="table-wrapper"><table><thead><tr><th>Key</th><th>Description</th><th>Default</th></tr></thead><tbody>
-<tr><td><code>hidden</code></td><td>Enables ignoring hidden files</td><td>true</td></tr>
-<tr><td><code>follow-symlinks</code></td><td>Follow symlinks instead of ignoring them</td><td>true</td></tr>
-<tr><td><code>deduplicate-links</code></td><td>Ignore symlinks that point at files already shown in the picker</td><td>true</td></tr>
-<tr><td><code>parents</code></td><td>Enables reading ignore files from parent directories</td><td>true</td></tr>
-<tr><td><code>ignore</code></td><td>Enables reading <code>.ignore</code> files</td><td>true</td></tr>
-<tr><td><code>git-ignore</code></td><td>Enables reading <code>.gitignore</code> files</td><td>true</td></tr>
-<tr><td><code>git-global</code></td><td>Enables reading global <code>.gitignore</code>, whose path is specified in git's config: <code>core.excludefile</code> option</td><td>true</td></tr>
-<tr><td><code>git-exclude</code></td><td>Enables reading <code>.git/info/exclude</code> files</td><td>true</td></tr>
+<tr><td><code>hidden</code></td><td>Enables ignoring hidden files</td><td><code>true</code></td></tr>
+<tr><td><code>follow-symlinks</code></td><td>Follow symlinks instead of ignoring them</td><td><code>true</code></td></tr>
+<tr><td><code>deduplicate-links</code></td><td>Ignore symlinks that point at files already shown in the picker</td><td><code>true</code></td></tr>
+<tr><td><code>parents</code></td><td>Enables reading ignore files from parent directories</td><td><code>true</code></td></tr>
+<tr><td><code>ignore</code></td><td>Enables reading <code>.ignore</code> files</td><td><code>true</code></td></tr>
+<tr><td><code>git-ignore</code></td><td>Enables reading <code>.gitignore</code> files</td><td><code>true</code></td></tr>
+<tr><td><code>git-global</code></td><td>Enables reading global <code>.gitignore</code>, whose path is specified in git's config: <code>core.excludesfile</code> option</td><td><code>true</code></td></tr>
+<tr><td><code>git-exclude</code></td><td>Enables reading <code>.git/info/exclude</code> files</td><td><code>true</code></td></tr>
 <tr><td><code>max-depth</code></td><td>Set with an integer value for maximum depth to recurse</td><td>Defaults to <code>None</code>.</td></tr>
 </tbody></table>
 </div>
+<p>Ignore files can be placed locally as <code>.ignore</code> or put in your home directory as <code>~/.ignore</code>. They support the usual ignore and negative ignore (unignore) rules used in <code>.gitignore</code> files.</p>
+<p>Additionally, you can use Helix-specific ignore files by creating a local <code>.helix/ignore</code> file in the current workspace or a global <code>ignore</code> file located in your Helix config directory:</p>
+<ul>
+<li>Linux and Mac: <code>~/.config/helix/ignore</code></li>
+<li>Windows: <code>%AppData%\helix\ignore</code></li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-ini"># unignore in file picker and global search
+!.github/
+!.gitignore
+!.gitattributes
+</code></pre>
 <h3 id="editorauto-pairs-section"><a class="header" href="#editorauto-pairs-section"><code>[editor.auto-pairs]</code> Section</a></h3>
 <p>Enables automatic insertion of pairs to parentheses, brackets, etc. Can be a
 simple boolean value, or a specific mapping of pairs of single characters.</p>
@@ -1711,6 +1759,7 @@ berry = &quot;#2A2A4D&quot;
 <p><code>type</code> - Types</p>
 <ul>
 <li><code>builtin</code> - Primitive types provided by the language (<code>int</code>, <code>usize</code>)</li>
+<li><code>parameter</code> - Generic type parameters (<code>T</code>)</li>
 <li><code>enum</code>
 <ul>
 <li><code>variant</code></li>
@@ -1949,11 +1998,14 @@ berry = &quot;#2A2A4D&quot;
 <tr><td><code>ui.statusline.insert</code></td><td>Statusline mode during insert mode (<a href="./configuration.html#editor-section">only if <code>editor.color-modes</code> is enabled</a>)</td></tr>
 <tr><td><code>ui.statusline.select</code></td><td>Statusline mode during select mode (<a href="./configuration.html#editor-section">only if <code>editor.color-modes</code> is enabled</a>)</td></tr>
 <tr><td><code>ui.statusline.separator</code></td><td>Separator character in statusline</td></tr>
+<tr><td><code>ui.bufferline</code></td><td>Style for the buffer line</td></tr>
+<tr><td><code>ui.bufferline.active</code></td><td>Style for the active buffer in buffer line</td></tr>
+<tr><td><code>ui.bufferline.background</code></td><td>Style for bufferline background</td></tr>
 <tr><td><code>ui.popup</code></td><td>Documentation popups (e.g. Space + k)</td></tr>
 <tr><td><code>ui.popup.info</code></td><td>Prompt for multiple key options</td></tr>
 <tr><td><code>ui.window</code></td><td>Borderlines separating splits</td></tr>
 <tr><td><code>ui.help</code></td><td>Description box for commands</td></tr>
-<tr><td><code>ui.text</code></td><td>Command prompts, popup text, etc.</td></tr>
+<tr><td><code>ui.text</code></td><td>Default text style, command prompts, popup text, etc.</td></tr>
 <tr><td><code>ui.text.focus</code></td><td>The currently selected line in the picker</td></tr>
 <tr><td><code>ui.text.inactive</code></td><td>Same as <code>ui.text</code> but when the text is inactive (e.g. suggestions)</td></tr>
 <tr><td><code>ui.text.info</code></td><td>The key: command text in <code>ui.popup.info</code> boxes</td></tr>
@@ -2112,8 +2164,10 @@ language-servers = [ &quot;mylang-lsp&quot; ]
 <tr><td><code>language-servers</code></td><td>The Language Servers used for this language. See below for more information in the section <a href="languages.html#configuring-language-servers-for-a-language">Configuring Language Servers for a language</a></td></tr>
 <tr><td><code>grammar</code></td><td>The tree-sitter grammar to use (defaults to the value of <code>name</code>)</td></tr>
 <tr><td><code>formatter</code></td><td>The formatter for the language, it will take precedence over the lsp when defined. The formatter must be able to take the original file as input from stdin and write the formatted file to stdout</td></tr>
+<tr><td><code>soft-wrap</code></td><td><a href="./configuration.html#editorsoft-wrap-section">editor.softwrap</a></td></tr>
 <tr><td><code>text-width</code></td><td>Maximum line length. Used for the <code>:reflow</code> command and soft-wrapping if <code>soft-wrap.wrap-at-text-width</code> is set, defaults to <code>editor.text-width</code></td></tr>
 <tr><td><code>workspace-lsp-roots</code></td><td>Directories relative to the workspace root that are treated as LSP roots. Should only be set in <code>.helix/config.toml</code>. Overwrites the setting of the same name in <code>config.toml</code> if set.</td></tr>
+<tr><td><code>persistent-diagnostic-sources</code></td><td>An array of LSP diagnostic sources assumed unchanged when the language server resends the same set of diagnostics. Helix can track the position for these diagnostics internally instead. Useful for diagnostics that are recomputed on save.</td></tr>
 </tbody></table>
 </div>
 <h3 id="file-type-detection-and-the-file-types-key"><a class="header" href="#file-type-detection-and-the-file-types-key">File-type detection and the <code>file-types</code> key</a></h3>
@@ -2283,6 +2337,7 @@ you will need to add queries.</li>
 <li>Refer to the
 <a href="https://tree-sitter.github.io/tree-sitter/syntax-highlighting#queries">tree-sitter website</a>
 for more information on writing queries.</li>
+<li>A list of highlight captures can be found <a href="https://docs.helix-editor.com/themes.html#scopes">on the themes page</a>.</li>
 </ol>
 <blockquote>
 <p>💡 In Helix, the first matching query takes precedence when evaluating
@@ -2299,6 +2354,7 @@ to fetch the grammars and <code>hx --grammar build</code> to build any out-of-da
 grammars.</li>
 <li>If a parser is causing a segfault, or you want to remove it, make sure to
 remove the compiled parser located at <code>runtime/grammars/&lt;name&gt;.so</code>.</li>
+<li>If you are attempting to add queries and Helix is unable to locate them, ensure that the environment variable <code>HELIX_RUNTIME</code> is set to the location of the <code>runtime</code> folder you're developing in.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="adding-textobject-queries"><a class="header" href="#adding-textobject-queries">Adding textobject queries</a></h1>
 <p>Helix supports textobjects that are language specific, such as functions, classes, etc.
@@ -2347,6 +2403,14 @@ the capture.</p>
 <p>Note that it matters where these added indents begin. For example,
 multiple indent level increases that start on the same line only increase
 the total indent level by 1. See <a href="guides/indent.html#capture-types">Capture types</a>.</p>
+<p>By default, Helix uses the <code>hybrid</code> indentation heuristic. This means that
+indent queries are not used to compute the expected absolute indentation of a
+line but rather the expected difference in indentation between the new and an
+already existing line. This difference is then added to the actual indentation
+of the already existing line. Since this makes errors in the indent queries
+harder to find, it is recommended to disable it when testing via
+<code>:set indent-heuristic tree-sitter</code>. The rest of this guide assumes that
+the <code>tree-sitter</code> heuristic is used.</p>
 <h2 id="indent-queries"><a class="header" href="#indent-queries">Indent queries</a></h2>
 <p>When Helix is inserting a new line through <code>o</code>, <code>O</code>, or <code>&lt;ret&gt;</code>, to determine
 the indent level for the new line, the query in <code>indents.scm</code> is run on the
@@ -2602,6 +2666,11 @@ The first argument (a capture) must/must not be equal to the second argument
 The first argument (a capture) must/must not match the regex given in the
 second argument (a string).</p>
 </li>
+<li>
+<p><code>#any-of?</code>/<code>#not-any-of?</code>:
+The first argument (a capture) must/must not be one of the other arguments
+(strings).</p>
+</li>
 </ul>
 <p>Additionally, we support some custom predicates for indent queries:</p>
 <ul>
@@ -2717,6 +2786,10 @@ The first argument (a capture) must be equal to the second argument
 <p><code>#match?</code> (standard):
 The first argument (a capture) must match the regex given in the
 second argument (a string).</p>
+</li>
+<li>
+<p><code>#any-of?</code> (standard):
+The first argument (a capture) must be one of the other arguments (strings).</p>
 </li>
 </ul>
 
