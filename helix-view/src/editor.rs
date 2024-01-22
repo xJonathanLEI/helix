@@ -40,6 +40,7 @@ use tokio::{
 use anyhow::{anyhow, bail, Error};
 
 pub use helix_core::diagnostic::Severity;
+use helix_core::syntax::LanguageConfiguration;
 use helix_core::{
     auto_pairs::AutoPairs,
     syntax::{self, AutoPairConfig, IndentationHeuristic, LanguageServerFeature, SoftWrap},
@@ -1678,16 +1679,41 @@ impl Editor {
     }
 
     pub fn new_file(&mut self, action: Action) -> DocumentId {
-        self.new_file_from_document(action, Document::default(self.config.clone()))
+        self.new_file_with_language(action, None)
     }
 
-    pub fn new_file_from_stdin(&mut self, action: Action) -> Result<DocumentId, Error> {
+    pub fn new_file_with_language(
+        &mut self,
+        action: Action,
+        language: Option<Arc<LanguageConfiguration>>,
+    ) -> DocumentId {
+        let mut doc = Document::default(self.config.clone());
+
+        // Using `if let` instead to avoid unnecessary clone of `syn_loader` when it's None
+        if let Some(language) = language {
+            doc.set_language(Some(language), Some(self.syn_loader.clone()));
+        }
+
+        self.new_file_from_document(action, doc)
+    }
+
+    pub fn new_file_from_stdin(
+        &mut self,
+        action: Action,
+        language: Option<Arc<LanguageConfiguration>>,
+    ) -> Result<DocumentId, Error> {
         let (stdin, encoding, has_bom) = crate::document::read_to_string(&mut stdin(), None)?;
-        let doc = Document::from(
+        let mut doc = Document::from(
             helix_core::Rope::default(),
             Some((encoding, has_bom)),
             self.config.clone(),
         );
+
+        // Using `if let` instead to avoid unnecessary clone of `syn_loader` when it's None
+        if let Some(language) = language {
+            doc.set_language(Some(language), Some(self.syn_loader.clone()));
+        }
+
         let doc_id = self.new_file_from_document(action, doc);
         let doc = doc_mut!(self, &doc_id);
         let view = view_mut!(self);
@@ -1702,6 +1728,15 @@ impl Editor {
 
     // ??? possible use for integration tests
     pub fn open(&mut self, path: &Path, action: Action) -> Result<DocumentId, DocumentOpenError> {
+        self.open_with_language(path, action, None)
+    }
+
+    pub fn open_with_language(
+        &mut self,
+        path: &Path,
+        action: Action,
+        language: Option<Arc<LanguageConfiguration>>,
+    ) -> Result<DocumentId, DocumentOpenError> {
         let path = helix_stdx::path::canonicalize(path);
         let id = self.document_by_path(&path).map(|doc| doc.id);
 
@@ -1718,6 +1753,11 @@ impl Editor {
             let diagnostics =
                 Editor::doc_diagnostics(&self.language_servers, &self.diagnostics, &doc);
             doc.replace_diagnostics(diagnostics, &[], None);
+
+            // Using `if let` instead to avoid unnecessary clone of `syn_loader` when it's None
+            if let Some(language) = language {
+                doc.set_language(Some(language), Some(self.syn_loader.clone()));
+            }
 
             if let Some(diff_base) = self.diff_providers.get_diff_base(&path) {
                 doc.set_diff_base(diff_base);

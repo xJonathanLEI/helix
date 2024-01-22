@@ -154,6 +154,16 @@ impl Application {
         let editor_view = Box::new(ui::EditorView::new(Keymaps::new(keys)));
         compositor.push(editor_view);
 
+        let language = match &args.language {
+            Some(lang) => Some(
+                syn_loader
+                    .load()
+                    .language_config_for_language_id(lang)
+                    .ok_or_else(|| anyhow::anyhow!("invalid language id: {}", lang))?,
+            ),
+            None => None,
+        };
+
         if args.load_tutor {
             let path = helix_loader::runtime_file(Path::new("tutor"));
             editor.open(&path, Action::VerticalSplit)?;
@@ -189,15 +199,16 @@ impl Application {
                             Some(Layout::Horizontal) => Action::HorizontalSplit,
                             None => Action::Load,
                         };
-                        let doc_id = match editor.open(&file, action) {
-                            // Ignore irregular files during application init.
-                            Err(DocumentOpenError::IrregularFile) => {
-                                nr_of_files -= 1;
-                                continue;
-                            }
-                            Err(err) => return Err(anyhow::anyhow!(err)),
-                            Ok(doc_id) => doc_id,
-                        };
+                        let doc_id =
+                            match editor.open_with_language(&file, action, language.clone()) {
+                                // Ignore irregular files during application init.
+                                Err(DocumentOpenError::IrregularFile) => {
+                                    nr_of_files -= 1;
+                                    continue;
+                                }
+                                Err(err) => return Err(anyhow::anyhow!(err)),
+                                Ok(doc_id) => doc_id,
+                            };
                         // with Action::Load all documents have the same view
                         // NOTE: this isn't necessarily true anymore. If
                         // `--vsplit` or `--hsplit` are used, the file which is
@@ -224,14 +235,14 @@ impl Application {
                     align_view(doc, view, Align::Center);
                 }
             } else {
-                editor.new_file(Action::VerticalSplit);
+                editor.new_file_with_language(Action::VerticalSplit, language);
             }
         } else if stdin().is_tty() || cfg!(feature = "integration") {
-            editor.new_file(Action::VerticalSplit);
+            editor.new_file_with_language(Action::VerticalSplit, language);
         } else {
             editor
-                .new_file_from_stdin(Action::VerticalSplit)
-                .unwrap_or_else(|_| editor.new_file(Action::VerticalSplit));
+                .new_file_from_stdin(Action::VerticalSplit, language.clone())
+                .unwrap_or_else(|_| editor.new_file_with_language(Action::VerticalSplit, language));
         }
 
         editor.set_theme(theme);
