@@ -9,8 +9,6 @@ set -x
 INTERESTING_PRS=(
   # Support going to specific positions in file
   5260
-  # Make mouse click extend selection in select mode
-  5436
   # Changed file picker
   5645
   # Inline Diagnostics
