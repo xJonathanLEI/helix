@@ -9,8 +9,6 @@ set -x
 INTERESTING_PRS=(
   # Support going to specific positions in file
   5260
-  # Changed file picker
-  5645
   # Inline Diagnostics
   # 6417 (conflicts)
 )
