@@ -89,7 +89,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../title-page.html">Helix</a></li><li class="chapter-item expanded "><a href="../install.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../usage.html"><strong aria-hidden="true">2.</strong> Usage</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../keymap.html"><strong aria-hidden="true">2.1.</strong> Keymap</a></li><li class="chapter-item expanded "><a href="../commands.html"><strong aria-hidden="true">2.2.</strong> Commands</a></li><li class="chapter-item expanded "><a href="../lang-support.html"><strong aria-hidden="true">2.3.</strong> Language support</a></li></ol></li><li class="chapter-item expanded "><a href="../from-vim.html"><strong aria-hidden="true">3.</strong> Migrating from Vim</a></li><li class="chapter-item expanded "><a href="../configuration.html"><strong aria-hidden="true">4.</strong> Configuration</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../themes.html"><strong aria-hidden="true">4.1.</strong> Themes</a></li><li class="chapter-item expanded "><a href="../remapping.html"><strong aria-hidden="true">4.2.</strong> Key remapping</a></li><li class="chapter-item expanded "><a href="../languages.html"><strong aria-hidden="true">4.3.</strong> Languages</a></li></ol></li><li class="chapter-item expanded "><a href="../guides/index.html"><strong aria-hidden="true">5.</strong> Guides</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../guides/adding_languages.html"><strong aria-hidden="true">5.1.</strong> Adding languages</a></li><li class="chapter-item expanded "><a href="../guides/textobject.html"><strong aria-hidden="true">5.2.</strong> Adding textobject queries</a></li><li class="chapter-item expanded "><a href="../guides/indent.html" class="active"><strong aria-hidden="true">5.3.</strong> Adding indent queries</a></li><li class="chapter-item expanded "><a href="../guides/injection.html"><strong aria-hidden="true">5.4.</strong> Adding injection queries</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../title-page.html">Helix</a></li><li class="chapter-item expanded "><a href="../install.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../package-managers.html"><strong aria-hidden="true">1.1.</strong> Package Managers</a></li><li class="chapter-item expanded "><a href="../building-from-source.html"><strong aria-hidden="true">1.2.</strong> Building from source</a></li></ol></li><li class="chapter-item expanded "><a href="../usage.html"><strong aria-hidden="true">2.</strong> Usage</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../registers.html"><strong aria-hidden="true">2.1.</strong> Registers</a></li><li class="chapter-item expanded "><a href="../surround.html"><strong aria-hidden="true">2.2.</strong> Surround</a></li><li class="chapter-item expanded "><a href="../textobjects.html"><strong aria-hidden="true">2.3.</strong> Textobjects</a></li><li class="chapter-item expanded "><a href="../syntax-aware-motions.html"><strong aria-hidden="true">2.4.</strong> Syntax aware motions</a></li><li class="chapter-item expanded "><a href="../keymap.html"><strong aria-hidden="true">2.5.</strong> Keymap</a></li><li class="chapter-item expanded "><a href="../commands.html"><strong aria-hidden="true">2.6.</strong> Commands</a></li><li class="chapter-item expanded "><a href="../lang-support.html"><strong aria-hidden="true">2.7.</strong> Language support</a></li></ol></li><li class="chapter-item expanded "><a href="../from-vim.html"><strong aria-hidden="true">3.</strong> Migrating from Vim</a></li><li class="chapter-item expanded "><a href="../configuration.html"><strong aria-hidden="true">4.</strong> Configuration</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../editor.html"><strong aria-hidden="true">4.1.</strong> Editor</a></li><li class="chapter-item expanded "><a href="../themes.html"><strong aria-hidden="true">4.2.</strong> Themes</a></li><li class="chapter-item expanded "><a href="../remapping.html"><strong aria-hidden="true">4.3.</strong> Key remapping</a></li><li class="chapter-item expanded "><a href="../languages.html"><strong aria-hidden="true">4.4.</strong> Languages</a></li></ol></li><li class="chapter-item expanded "><a href="../guides/index.html"><strong aria-hidden="true">5.</strong> Guides</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../guides/adding_languages.html"><strong aria-hidden="true">5.1.</strong> Adding languages</a></li><li class="chapter-item expanded "><a href="../guides/textobject.html"><strong aria-hidden="true">5.2.</strong> Adding textobject queries</a></li><li class="chapter-item expanded "><a href="../guides/indent.html" class="active"><strong aria-hidden="true">5.3.</strong> Adding indent queries</a></li><li class="chapter-item expanded "><a href="../guides/injection.html"><strong aria-hidden="true">5.4.</strong> Adding injection queries</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -291,7 +291,7 @@ actually have been extended).</li>
 // 3x @outdent
 <span class="boring">}</span></code></pre></pre>
 <pre><code class="language-scm">((block) @indent)
-[&quot;}&quot; &quot;)&quot;] @outdent
+["}" ")"] @outdent
 </code></pre>
 <p>Note how on the second line, we have two blocks begin on the same line. In this
 case, since both captures occur on the same line, they are combined and only
@@ -331,7 +331,7 @@ whitespace-sensitive.</p>
 the cursor on a line feed ends up being the entire inside of the class. Because
 of this, it will miss the entire function node and its indent capture, leading
 to an indent level one too small.</p>
-<p>To address this case, <code>@extend</code> tells helix to &quot;extend&quot; the captured node's span
+<p>To address this case, <code>@extend</code> tells helix to "extend" the captured node's span
 to the line feed and every consecutive line that has a greater indent level than
 the line of the node.</p>
 <pre><code class="language-scm">(parenthesized_expression) @indent
@@ -439,7 +439,7 @@ similar to how <code>#set!</code> declarations work:</p>
 )
 </code></pre>
 <p>The number of arguments depends on the predicate that's used.
-Each argument is either a capture (<code>@name</code>) or a string (<code>&quot;some string&quot;</code>).
+Each argument is either a capture (<code>@name</code>) or a string (<code>"some string"</code>).
 The following predicates are supported by tree-sitter:</p>
 <ul>
 <li>
@@ -491,21 +491,21 @@ This scope applies to the whole captured node. This is only different from
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn aha() { // ←─────────────────────────────────────╮
-  let take = &quot;on me&quot;;  // ←──────────────╮  scope:  │
-  let take = &quot;me on&quot;;             //     ├─ &quot;tail&quot;  ├─ (block) @indent
+  let take = "on me";  // ←──────────────╮  scope:  │
+  let take = "me on";             //     ├─ "tail"  ├─ (block) @indent
   let ill = be_gone_days(1 || 2); //     │          │
-} // ←───────────────────────────────────┴──────────┴─ &quot;}&quot; @outdent
-                                         //                scope: &quot;all&quot;
+} // ←───────────────────────────────────┴──────────┴─ "}" @outdent
+                                         //                scope: "all"
 <span class="boring">}</span></code></pre></pre>
 <p>We can write the following query with the <code>#set!</code> declaration:</p>
 <pre><code class="language-scm">((block) @indent
- (#set! &quot;scope&quot; &quot;tail&quot;))
-(&quot;}&quot; @outdent
- (#set! &quot;scope&quot; &quot;all&quot;))
+ (#set! "scope" "tail"))
+("}" @outdent
+ (#set! "scope" "all"))
 </code></pre>
-<p>As we can see, the &quot;tail&quot; scope covers the node, except for the first line.
+<p>As we can see, the "tail" scope covers the node, except for the first line.
 Everything up to and including the closing brace gets an indent level of 1.
-Then, on the closing brace, we encounter an outdent with a scope of &quot;all&quot;, which
+Then, on the closing brace, we encounter an outdent with a scope of "all", which
 means the first line is included, and the indent level is cancelled out on this
 line. (Note these scopes are the defaults for <code>@indent</code> and <code>@outdent</code>—they are
 written explicitly for demonstration.)</p>
